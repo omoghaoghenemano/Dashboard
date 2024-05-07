@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!--
+* Data Visualization - Framework
+* Copyright (C) University of Passau
+*   Faculty of Computer Science and Mathematics
+*   Chair of Cognitive sensor systems
+* Maintenance:
+*   2024, Alexander Gall <alexander.gall@uni-passau.de>
+*
+* All rights reserved.
+-->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Visualization Exercise</title>
+
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <!-- include d3 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- include jQueryUI -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <!-- PART 1: include dataVis script -->
+    <script src="dataVis.js"></script>
+    <!-- PART 2: include scripts for the dashboard -->
+    <script src="dashboard.js"></script>
+
+</head>
+
+<!-- call init function when page has loaded -->
+<body onload="init()">
+
+<h1>Data Visualization Exercise</h1>
+
+<!-- credits -->
+<div id="credits">
+    Created by <span class="instructions">YOUR NAME</span>
+    for the Data Visualization Lecture at <a href="https://www.fim.uni-passau.de/digitale-bildverarbeitung"> Faculty of Computer
+    Science and Mathematics - Chair of Cognitive sensor systems - University of Passau</a>.
+</div>
+
+<!-- create buttons to select tabs -->
+<button class="tablink" onclick="openPage('DataLoading', this, 'blue')" id="defaultOpen" >Data Loading</button>
+<button class="tablink" onclick="openPage('BasicVisualization', this, 'blue')">Basic Visualization</button>
+<button class="tablink" onclick="openPage('Dashboard', this, 'blue')">Dashboard</button>
+
+<!-- Tab 1 -->
+<div id="DataLoading" class="tabcontent">
+
+    <!-- data selector -->
+    <p>Select your data here: <input id="upload" type="file"></p>
+
+    <!-- data table -->
+    <div id="dataTable"></div>
+
+</div>
+
+<!-- Tab 2 -->
+<div id="BasicVisualization" class="tabcontent">
+
+    <!-- scatterplot -->
+    <div class="container">
+        <!-- scatterplot menu -->
+        <h2>Scatterplot</h2>
+
+        <p>Select dimensions to be displayed here: </p>
+        <div id="menu">
+            <form action="#">
+                <fieldset>
+                    <label for="scatterX">x axis: </label>
+                    <select name="scatterX" id="scatterX">
+                    </select>
+                    <br/>
+                    <label for="scatterY">y axis: </label>
+                    <select name="scatterY" id="scatterY">
+                    </select>
+                    <br/>
+                    <label for="size">size: </label>
+                    <select name="size" id="size">
+                    </select>
+                </fieldset>
+            </form>
+        </div>
+        <!-- scatterplot SVG -->
+        <div id="sp"></div>
+    </div>
+
+    <!-- radar chart -->
+    <div class="container">
+        <h2>Radar Chart</h2>
+        <!-- radar chart SVG -->
+        <div id="radar"></div>
+        <div id="legend">
+            <b>Legend:</b><br/>
+        </div>
+    </div>
+
+</div>
+
+<!-- Tab 3 -->
+<div id="Dashboard" class="tabcontent">
+    <h1>Dashboard Example</h1>
+
+    <!-- TODO: The environment of your dashboard can be freely customized. Here is a general layout to get you started. -->
+
+    <!-- Grid container -->
+    <div class="dashboardGrid">
+
+        <!-- chart 1 -->
+        <div class="container">
+           <h2>Chart 1</h2>
+			<h4>Data representation 1.</h4>
+            <!-- radar chart SVG -->
+            <div id="chart1"></div>
+        </div>
+
+        <!-- chart 2 -->
+        <div class="container">
+           <h2>Chart 2</h2>
+			 <h4>Data representation 2.</h4>
+            <!-- radar chart SVG -->
+            <div id="chart2"></div>
+        </div>
+
+        <!-- chart 3 -->
+        <div class="container">
+            <h2>Chart 3</h2>
+			  <h4>Data representation 3.</h4>
+            <!-- radar chart SVG -->
+            <div id="chart3"></div>
+        </div>
+
+        <!-- chart 4 -->
+        <div class="container">
+            <h2>Chart 4</h2>
+            <h4>Data representation 4.</h4>
+            <!-- radar chart SVG -->
+            <div id="chart4"></div>
+        </div>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>
