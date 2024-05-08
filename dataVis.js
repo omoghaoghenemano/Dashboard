@@ -63,14 +63,15 @@ function init() {
 
         let reader = new FileReader();
         reader.onloadend = function () {
-            console.log("data loaded: ");
-            console.log(reader.result);
 
-            // TODO: parse reader.result data and call the init functions with the parsed data!
-            initVis(null);
-            CreateDataTable(null);
-            // TODO: possible place to call the dashboard file for Part 2
-            initDashboard(null);
+            let data = d3.csvParse(reader.result, d3.autoType);
+            console.log("data loaded: ");
+            console.log(data);
+            console.log("Dimensions:", data.columns);
+            
+            CreateDataTable(data);
+            initVis(data);
+            initDashboard(data);
         };
         reader.readAsBinaryString(fileInput.files[0]);
     };
@@ -79,9 +80,8 @@ function init() {
 
 
 function initVis(_data){
-
-    // TODO: parse dimensions (i.e., attributes) from input file
-
+    dimensions = _data.columns;
+    dimensions = dimensions.filter(d => !isNaN(_data[0][d]));
 
     // y scalings for scatterplot
     // TODO: set y domain for each dimension
@@ -142,9 +142,22 @@ function initVis(_data){
         .attr("class", "line")
         .style("stroke", "black");
 
-    // TODO: render grid lines in gray
+    // Render grid lines
+    for (let level = 1; level <= 7; level++) {
+        let factor = level / 7;
+        radarAxes.each(function(d, i) {
+            let nextIndex = (i + 1) % dimensions.length;
+            radar.append("line")
+                .attr("x1", radarX(axisRadius(maxAxisRadius) * factor, i))
+                .attr("y1", radarY(axisRadius(maxAxisRadius) * factor, i))
+                .attr("x2", radarX(axisRadius(maxAxisRadius) * factor, nextIndex))
+                .attr("y2", radarY(axisRadius(maxAxisRadius) * factor, nextIndex))
+                .style("stroke", "grey")
+                .style("stroke-width", "0.5px")
+                .style("stroke-opacity", "0.5");
+        });
+    }
 
-    // TODO: render correct axes labels
     radar.selectAll(".axisLabel")
         .data(dimensions)
         .enter()
@@ -153,7 +166,7 @@ function initVis(_data){
         .attr("dy", "0.35em")
         .attr("x", function(d, i){ return radarX(axisRadius(textRadius), i); })
         .attr("y", function(d, i){ return radarY(axisRadius(textRadius), i); })
-        .text("dimension");
+        .text(function(dimensions) { return dimensions; });
 
     // init menu for the visual channels
     channels.forEach(function(c){
@@ -178,20 +191,56 @@ function clear(){
 
 //Create Table
 function CreateDataTable(_data) {
+    // Clear previous data table contents
+    dataTable.selectAll('*').remove();
 
-    // TODO: create table and add class
+    // Create the table element
+    let table = dataTable.append('table').attr('class', 'data-table');
+    let thead = table.append('thead');
+    let tbody = table.append('tbody');
 
-    // TODO: add headers, row & columns
+    // Append the header row
+    thead.append('tr')
+      .selectAll('th')
+      .data(_data.columns)
+      .enter()
+      .append('th')
+      .text(function (column) { return column; });
 
-    // TODO: add mouseover event
+    // Create a row for each object in the data
+    let rows = tbody.selectAll('tr')
+      .data(_data)
+      .enter()
+      .append('tr');
 
+    // Create a cell in each row for each column
+    let cells = rows.selectAll('td')
+      .data(function (row) {
+          return _data.columns.map(function (column) {
+              return {column: column, value: row[column]};
+          });
+      })
+      .enter()
+      .append('td')
+      .text(function (d) { return d.value; });
+
+    // Apply click event for cell selection
+    cells.on('click', function(event, d) {
+        // Clear any previous selection
+        d3.selectAll('.data-table td').classed('selected', false);
+        // Select the current cell
+        d3.select(this).classed('selected', true);
+    });
 }
+
 function renderScatterplot(){
 
-    // TODO: get domain names from menu and label x- and y-axis
+    //get domain names from menu and label x- and y-axis
+    xAxisLabel.text(readMenu('scatterX'));
+    yAxisLabel.text(readMenu('scatterY'));
 
-    // TODO: re-render axes
-
+    //TODO: re-render axes
+    
     // TODO: render dots
 }
 
