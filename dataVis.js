@@ -27,7 +27,8 @@ let margin, width, height, radius;
 let scatter, radar, dataTable;
 
 // Add additional variables
-
+let domainByDimension = {};
+let data;
 
 function init() {
     // define size of plots
@@ -64,7 +65,7 @@ function init() {
         let reader = new FileReader();
         reader.onloadend = function () {
 
-            let data = d3.csvParse(reader.result, d3.autoType);
+            data = d3.csvParse(reader.result, d3.autoType);
             console.log("data loaded: ");
             console.log(data);
             console.log("Dimensions:", data.columns);
@@ -78,24 +79,31 @@ function init() {
     fileInput.addEventListener('change', readFile);
 }
 
+function setDomainByDimension(_data, _dimensions){
+    _dimensions.forEach(dim => {
+        domainByDimension[dim] = d3.extent(_data, d => d[dim]);
+    });
+}
 
 function initVis(_data){
     dimensions = _data.columns;
     dimensions = dimensions.filter(d => !isNaN(_data[0][d]));
+    setDomainByDimension(_data, dimensions);
 
     // y scalings for scatterplot
-    // TODO: set y domain for each dimension
     let y = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([height - margin.bottom - margin.top, margin.top]);
-
+    
     // x scalings for scatter plot
-    // TODO: set x domain for each dimension
     let x = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([margin.left, width - margin.left - margin.right]);
 
+    
     // radius scalings for radar chart
-    // TODO: set radius domain for each dimension
     let r = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([0, radius]);
 
     // scatterplot axes
@@ -239,9 +247,40 @@ function renderScatterplot(){
     xAxisLabel.text(readMenu('scatterX'));
     yAxisLabel.text(readMenu('scatterY'));
 
-    //TODO: re-render axes
-    
-    // TODO: render dots
+    //re-render axes
+    let y = d3.scaleLinear()
+        .domain(domainByDimension[readMenu('scatterY')])
+        .range([height - margin.bottom - margin.top, margin.top]);
+
+    let x = d3.scaleLinear()
+        .domain(domainByDimension[readMenu('scatterX')])
+        .range([margin.left, width - margin.left - margin.right]);
+
+    // Update the axes with the new scale
+    xAxis.call(d3.axisBottom(x));
+    yAxis.call(d3.axisLeft(y));
+
+    //render dots
+    let sizeScale = d3.scaleSqrt()
+        .domain(domainByDimension[readMenu('size')])
+        .range([2, 15]); // Adjust size range accordingly
+
+    // Bind data and create circles for each data point
+    let points = scatter.selectAll(".dot")
+        .data(data, d => d.id); 
+
+    debugger;
+    points.exit().remove(); // Remove previous dots
+    points.enter().append("circle")
+        .attr("class", "dot")
+        .merge(points)
+        .transition()
+        .duration(750)
+        .attr("cx", d => x(d[readMenu('scatterX')]))
+        .attr("cy", d => y(d[readMenu('scatterY')]))
+        .attr("r", d => sizeScale(d[readMenu('size')]))
+        .style("fill", "#708090") // Style as desired
+        .style("opacity", 0.7);
 }
 
 function renderRadarChart(){
