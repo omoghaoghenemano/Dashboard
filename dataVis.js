@@ -261,9 +261,9 @@ function renderScatterplot(){
         .range([margin.left, width - margin.left - margin.right]);
 
     // Update axes with transition
-    xAxis.call(d3.axisBottom(x));
-    yAxis.call(d3.axisLeft(y));
-
+    xAxis.transition().duration(1000).call(d3.axisBottom(x));
+    yAxis.transition().duration(1000).call(d3.axisLeft(y));
+    
     //render dots
     let sizeScale = d3.scaleSqrt()
         .domain(domainByDimension[readMenu('size')])
@@ -273,28 +273,42 @@ function renderScatterplot(){
     let update = scatter.selectAll(".dot")
         .data(data, d => d.id);
 
-    update.exit().remove();
-    update.enter().append("circle")
+    update.exit()
+        .transition() // for animation
+        .duration(1000) // time
+        .attr("r", 0)
+        .remove();
+    
+    // Enter new elements in the data
+    let enter = update.enter().append("circle")
         .attr("class", "dot")
-        .merge(update)
+        .attr("r", 0)  // initial dot size
+        .on("click", function(event, d) {  // triggered when dot is clicked
+            handleDotClick(event, d);
+        });
+    
+    enter.merge(update)
+        .transition()  // for animation
+        .duration(1000) // time
         .attr("cx", d => x(d[readMenu('scatterX')]))
         .attr("cy", d => y(d[readMenu('scatterY')]))
         .attr("r", d => sizeScale(d[readMenu('size')]))
         .style("fill", d => selectedPoints[d.id] ? selectedPoints[d.id].color : "#708090")
-        .style("opacity", 0.7)
-        .on("click", function (event, d) {
-            if (selectedPoints[d.id]) {
-                delete selectedPoints[d.id];
-            } else if (Object.keys(selectedPoints).length < 10) { // Limit to 10 selections
-                let availableColor = colorPalette.find(c => !Object.values(selectedPoints).find(sp => sp.color === c));
-                if (availableColor) {
-                    selectedPoints[d.id] = { color: availableColor, data: d, label: d[dimensions[0]] };
-                }
-            }
-            updateLegend();
-            renderScatterplot();
-            renderRadarChart();
-        });
+        .style("opacity", 0.7);
+}
+
+function handleDotClick(event, d) {
+    if (selectedPoints[d.id]) {
+        delete selectedPoints[d.id];
+    } else if (Object.keys(selectedPoints).length < 10) { // Limit to 10 selections
+        let availableColor = colorPalette.find(c => !Object.values(selectedPoints).find(sp => sp.color === c));
+        if (availableColor) {
+            selectedPoints[d.id] = { color: availableColor, data: d, label: d[dimensions[0]] };
+        }
+    }
+    updateLegend();
+    renderScatterplot();
+    renderRadarChart();
 }
 
 function updateLegend() {
@@ -365,7 +379,6 @@ function renderRadarChart(){
     });
 }
 
-// Additional helper functions to calculate radar chart positions
 function radarScale(value, dimension) {
     return d3.scaleLinear()
         .domain(domainByDimension[dimension])
