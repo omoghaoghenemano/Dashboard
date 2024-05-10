@@ -95,22 +95,26 @@ fieldset {
     border-width: 0;
 }
 
-#legend {
-    border: 1px solid black;
-    padding: 10px;
+.legend-item span {
+    margin-right: 10px;
+    vertical-align: middle;
 }
 
-/* the style for the close-button in the legend */
-.close {
+.legend-item .close {
     display: inline-block;
     padding: 1px 5px;
-    margin: 4px;
+    margin-left: 4px;
     border: 1px solid black;
     color: #000;
     background: #fff;
     font-weight: bold;
     cursor: pointer;
     user-select: none;
+}
+
+#legend {
+    border: 1px solid black;
+    padding: 10px;
 }
 
 .close:hover {

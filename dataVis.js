@@ -27,7 +27,10 @@ let margin, width, height, radius;
 let scatter, radar, dataTable;
 
 // Add additional variables
-
+let domainByDimension = {};
+let data;
+let selectedPoints = {};
+let colorPalette = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#6A5ACD", "#FF69B4", "#708090", "#FFA500", "#8A2BE2", "#A0522D"];
 
 function init() {
     // define size of plots
@@ -64,12 +67,14 @@ function init() {
         let reader = new FileReader();
         reader.onloadend = function () {
 
-            let data = d3.csvParse(reader.result, d3.autoType);
+            data = d3.csvParse(reader.result, d3.autoType);
             console.log("data loaded: ");
             console.log(data);
             console.log("Dimensions:", data.columns);
             
             CreateDataTable(data);
+
+            data.forEach((d, index) => d.id = index);
             initVis(data);
             initDashboard(data);
         };
@@ -78,24 +83,31 @@ function init() {
     fileInput.addEventListener('change', readFile);
 }
 
+function setDomainByDimension(_data, _dimensions){
+    _dimensions.forEach(dim => {
+        domainByDimension[dim] = d3.extent(_data, d => d[dim]);
+    });
+}
 
 function initVis(_data){
     dimensions = _data.columns;
     dimensions = dimensions.filter(d => !isNaN(_data[0][d]));
+    setDomainByDimension(_data, dimensions);
 
     // y scalings for scatterplot
-    // TODO: set y domain for each dimension
     let y = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([height - margin.bottom - margin.top, margin.top]);
-
+    
     // x scalings for scatter plot
-    // TODO: set x domain for each dimension
     let x = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([margin.left, width - margin.left - margin.right]);
 
+    
     // radius scalings for radar chart
-    // TODO: set radius domain for each dimension
     let r = d3.scaleLinear()
+        .domain(domainByDimension[dimensions[0]])
         .range([0, radius]);
 
     // scatterplot axes
@@ -239,18 +251,126 @@ function renderScatterplot(){
     xAxisLabel.text(readMenu('scatterX'));
     yAxisLabel.text(readMenu('scatterY'));
 
-    //TODO: re-render axes
-    
-    // TODO: render dots
+    //re-render axes
+    let y = d3.scaleLinear()
+        .domain(domainByDimension[readMenu('scatterY')])
+        .range([height - margin.bottom - margin.top, margin.top]);
+
+    let x = d3.scaleLinear()
+        .domain(domainByDimension[readMenu('scatterX')])
+        .range([margin.left, width - margin.left - margin.right]);
+
+    // Update axes with transition
+    xAxis.call(d3.axisBottom(x));
+    yAxis.call(d3.axisLeft(y));
+
+    //render dots
+    let sizeScale = d3.scaleSqrt()
+        .domain(domainByDimension[readMenu('size')])
+        .range([2, 15]); // Adjust size range accordingly
+
+    // Bind data and create circles for each data point
+    let update = scatter.selectAll(".dot")
+        .data(data, d => d.id);
+
+    update.exit().remove();
+    update.enter().append("circle")
+        .attr("class", "dot")
+        .merge(update)
+        .attr("cx", d => x(d[readMenu('scatterX')]))
+        .attr("cy", d => y(d[readMenu('scatterY')]))
+        .attr("r", d => sizeScale(d[readMenu('size')]))
+        .style("fill", d => selectedPoints[d.id] ? selectedPoints[d.id].color : "#708090")
+        .style("opacity", 0.7)
+        .on("click", function (event, d) {
+            if (selectedPoints[d.id]) {
+                delete selectedPoints[d.id];
+            } else if (Object.keys(selectedPoints).length < 10) { // Limit to 10 selections
+                let availableColor = colorPalette.find(c => !Object.values(selectedPoints).find(sp => sp.color === c));
+                if (availableColor) {
+                    selectedPoints[d.id] = { color: availableColor, data: d, label: d[dimensions[0]] };
+                }
+            }
+            updateLegend();
+            renderScatterplot();
+            renderRadarChart();
+        });
+}
+
+function updateLegend() {
+    let legend = d3.select("#legend").selectAll(".legend-item")
+        .data(Object.entries(selectedPoints), d => d[0]);
+
+    legend.exit().remove();
+
+    let legendEnter = legend.enter().append("div")
+        .attr("class", "legend-item");
+
+    // Append a colored dot before the label
+    legendEnter.append("span")
+        .style("background-color", d => d[1].color)
+        .style("border-radius", "50%")
+        .style("display", "inline-block")
+        .style("width", "10px")
+        .style("height", "10px")
+        .style("margin-right", "5px");
+
+    legendEnter.append("span")
+        .style("color", d => d[1].color)
+        .text(d => `${d[1].label}`);
+
+    // Using <span> for the close button and applying class "close"
+    legendEnter.append("span")
+        .attr("class", "close")
+        .text("X")
+        .on("click", function(event, d) {
+            delete selectedPoints[d[0]]; 
+            updateLegend();
+            renderScatterplot(); 
+            renderRadarChart();  
+            event.stopPropagation(); 
+        });
+
+    // Merge and update existing items in the legend
+    legend.select("span.close").on("click", function(event, d) {
+        delete selectedPoints[d[0]];
+        updateLegend();
+        renderScatterplot();
+        renderRadarChart();  
+        event.stopPropagation();
+    });
+
+    legend.selectAll("span").filter((d, i) => i === 1)
+        .style("color", d => d[1].color)
+        .text(d => d[1].label);
 }
 
 function renderRadarChart(){
+    radar.selectAll(".radar-line").remove();  // Clear previous lines
 
-    // TODO: show selected items in legend
+    Object.entries(selectedPoints).forEach(([id, {color, data}]) => {
+        let pathData = dimensions.map((dim, i) => {
+            let rValue = radarScale(data[dim], dim);
+            return [radarX(rValue, i), radarY(rValue, i)];
+        });
 
-    // TODO: render polylines in a unique color
+        radar.append("path")
+            .datum(pathData)
+            .attr("d", d3.line().curve(d3.curveLinearClosed))
+            .attr("stroke-width", 2)
+            .attr("stroke", color)
+            .attr("fill", "none")
+            .attr("fill-opacity", 0.2)
+            .attr("class", "radar-line");
+    });
 }
 
+// Additional helper functions to calculate radar chart positions
+function radarScale(value, dimension) {
+    return d3.scaleLinear()
+        .domain(domainByDimension[dimension])
+        .range([0, radius])(value);
+}
 
 function radarX(radius, index){
     return radius * Math.cos(radarAngle(index));
