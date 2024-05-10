@@ -303,7 +303,7 @@ function handleDotClick(event, d) {
     } else if (Object.keys(selectedPoints).length < 10) { // Limit to 10 selections
         let availableColor = colorPalette.find(c => !Object.values(selectedPoints).find(sp => sp.color === c));
         if (availableColor) {
-            selectedPoints[d.id] = { color: availableColor, data: d, label: d[dimensions[0]] };
+            selectedPoints[d.Name] = { color: availableColor, data: d, label: d.Name };
         }
     }
     updateLegend();
@@ -329,6 +329,7 @@ function updateLegend() {
         .style("height", "10px")
         .style("margin-right", "5px");
 
+        console.log(selectedPoints,"selected point")
     legendEnter.append("span")
         .style("color", d => d[1].color)
         .text(d => `${d[1].label}`);
