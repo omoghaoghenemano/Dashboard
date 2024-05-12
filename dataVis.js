@@ -28,6 +28,7 @@ let scatter, radar, dataTable;
 
 // Add additional variables
 let domainByDimension = {};
+let domainByRadarDimension = {};
 let data;
 let selectedPoints = {};
 let colorPalette = ["#000000","#FF4500","#228B22","#4169E1","#FFD700","#8B008B","#FF8C00","#00CED1","#FF1493","#008000"];
@@ -85,7 +86,11 @@ function init() {
 
 function setDomainByDimension(_data, _dimensions){
     _dimensions.forEach(dim => {
-        domainByDimension[dim] = d3.extent(_data, d => d[dim]);
+        let extent = d3.extent(_data, d => d[dim]);
+        domainByDimension[dim] = extent;
+
+        let buffer = (extent[1] - extent[0]) * 0.5;
+        domainByRadarDimension[dim] = [extent[0] - buffer, extent[1] + buffer];
     });
 }
 
@@ -107,7 +112,7 @@ function initVis(_data){
     
     // radius scalings for radar chart
     let r = d3.scaleLinear()
-        .domain(domainByDimension[dimensions[0]])
+        .domain(domainByRadarDimension[dimensions[0]])
         .range([0, radius]);
 
     // scatterplot axes
@@ -347,7 +352,7 @@ function updateLegend() {
     // Using <span> for the close button and applying class "close"
     legendEnter.append("span")
         .attr("class", "close")
-        .text("X")
+        .text("x")
         .on("click", function(event, d) {
             delete selectedPoints[d[0]]; 
             updateLegend();
@@ -392,7 +397,7 @@ function renderRadarChart(){
 
 function radarScale(value, dimension) {
     return d3.scaleLinear()
-        .domain(domainByDimension[dimension])
+        .domain(domainByRadarDimension[dimension])
         .range([0, radius])(value);
 }
 
