@@ -43,13 +43,22 @@ body {
     height: 100%;
 }
 
-.dataTableClass {
+.data-table {
     width: 80%;
     border-collapse: collapse;
     border: 2px black solid;
 }
 
-.tableHeaderClass {
+.data-table th, .data-table td {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.data-table th {
     border: 2px solid black;
     padding: 5px;
     background-color: lightgray;
@@ -57,9 +66,8 @@ body {
     text-transform: uppercase;
 }
 
-.tableBodyClass {
-    border: 1px solid black;
-    padding: 5px;
+.selected {
+    background-color: #418bab;
 }
 
 svg {
@@ -147,23 +155,4 @@ div.tooltip {
     border-radius: 8px;
     pointer-events: none;
     font-size: .7rem;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.data-table th, .data-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.data-table tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-.selected {
-    background-color: #4CAF50; /* Seçilen öğeler için yeşil arka plan rengi */
 }
