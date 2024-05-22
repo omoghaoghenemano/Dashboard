@@ -28,9 +28,10 @@ let scatter, radar, dataTable;
 
 // Add additional variables
 let domainByDimension = {};
+let domainByRadarDimension = {};
 let data;
 let selectedPoints = {};
-let colorPalette = ["#FF6347", "#4682B4", "#32CD32", "#FFD700", "#6A5ACD", "#FF69B4", "#708090", "#FFA500", "#8A2BE2", "#A0522D"];
+let colorPalette = ["#000000","#FF4500","#228B22","#4169E1","#FFD700","#8B008B","#FF8C00","#00CED1","#FF1493","#008000"];
 
 function init() {
     // define size of plots
@@ -85,7 +86,11 @@ function init() {
 
 function setDomainByDimension(_data, _dimensions){
     _dimensions.forEach(dim => {
-        domainByDimension[dim] = d3.extent(_data, d => d[dim]);
+        let extent = d3.extent(_data, d => d[dim]);
+        domainByDimension[dim] = extent;
+
+        let buffer = (extent[1] - extent[0]) * 0.5;
+        domainByRadarDimension[dim] = [extent[0] - buffer, extent[1] + buffer];
     });
 }
 
@@ -107,7 +112,7 @@ function initVis(_data){
     
     // radius scalings for radar chart
     let r = d3.scaleLinear()
-        .domain(domainByDimension[dimensions[0]])
+        .domain(domainByRadarDimension[dimensions[0]])
         .range([0, radius]);
 
     // scatterplot axes
@@ -166,7 +171,7 @@ function initVis(_data){
                 .attr("y2", radarY(axisRadius(maxAxisRadius) * factor, nextIndex))
                 .style("stroke", "grey")
                 .style("stroke-width", "0.5px")
-                .style("stroke-opacity", "0.5");
+                .style("stroke-opacity", "0.9");
         });
     }
 
@@ -237,12 +242,23 @@ function CreateDataTable(_data) {
       .text(function (d) { return d.value; });
 
     // Apply click event for cell selection
-    cells.on('click', function(event, d) {
-        // Clear any previous selection
+    cells.on('click', function (event, d) {
+        
+        var isSelected = d3.select(this).classed('selected');
+
         d3.selectAll('.data-table td').classed('selected', false);
-        // Select the current cell
-        d3.select(this).classed('selected', true);
+
+        if (!isSelected) {
+            d3.select(this).classed('selected', true);
+        }
     });
+
+    cells.on("mouseover", function () {
+        d3.select(this).style("background-color", "#418bab");
+      })
+      .on("mouseout", function () {
+        d3.select(this).style("background-color", null);
+      });
 }
 
 function renderScatterplot(){
@@ -303,7 +319,7 @@ function handleDotClick(event, d) {
     } else if (Object.keys(selectedPoints).length < 10) { // Limit to 10 selections
         let availableColor = colorPalette.find(c => !Object.values(selectedPoints).find(sp => sp.color === c));
         if (availableColor) {
-            selectedPoints[d.Name] = { color: availableColor, data: d, label: d.Name };
+            selectedPoints[d.id] = { color: availableColor, data: d, label: d.Name };
         }
     }
     updateLegend();
@@ -337,7 +353,7 @@ function updateLegend() {
     // Using <span> for the close button and applying class "close"
     legendEnter.append("span")
         .attr("class", "close")
-        .text("X")
+        .text("x")
         .on("click", function(event, d) {
             delete selectedPoints[d[0]]; 
             updateLegend();
@@ -382,7 +398,7 @@ function renderRadarChart(){
 
 function radarScale(value, dimension) {
     return d3.scaleLinear()
-        .domain(domainByDimension[dimension])
+        .domain(domainByRadarDimension[dimension])
         .range([0, radius])(value);
 }
 
