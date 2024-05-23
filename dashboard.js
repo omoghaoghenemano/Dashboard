@@ -9,6 +9,10 @@
 * All rights reserved.
 */
 
+
+
+
+
 // TODO: File for Part 2
 // TODO: You can edit this file as you wish - add new methods, variables etc. or change/delete existing ones.
 
@@ -18,14 +22,22 @@ let chart1, chart2, chart3, chart4;
 function initDashboard(_data) {
 
     // TODO: Initialize the environment (SVG, etc.) and call the nedded methods
+     console.log("dataset", _data)
+    
+     const dataPreprocessing = new DataPreprocessing(_data)
+  
+    
 
-    //  SVG container
-    chart1 = d3.select("#chart1").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
 
-    //  SVG container
+
+ 
+   chart1 =  d3.json("https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json").then(function(data) {  
+        dataPreprocessing.renderMap(data);  
+    }); 
+
+  
+
+    //  SVG containerss
     chart2 = d3.select("#chart2").append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -52,6 +64,8 @@ function initDashboard(_data) {
     createChart4();
 }
 
+
+
 function createChart1(){
 
 }
@@ -76,3 +90,4 @@ function clearDashboard() {
     chart3.selectAll("*").remove();
     chart4.selectAll("*").remove();
 }
+
