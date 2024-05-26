@@ -49,6 +49,16 @@ body {
     border: 2px black solid;
 }
 
+.bar {
+    fill: steelblue;
+}
+.bar:hover {
+    fill: orange;
+}
+.axis-label {
+    font-size: 12px;
+}
+
 .data-table th, .data-table td {
     border: 1px solid black;
     padding: 5px;

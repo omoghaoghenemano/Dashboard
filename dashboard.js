@@ -22,11 +22,13 @@ let chart1, chart2, chart3, chart4;
 function initDashboard(_data) {
 
     // TODO: Initialize the environment (SVG, etc.) and call the nedded methods
-     console.log("dataset", _data)
+     
     
      const dataPreprocessing = new DataPreprocessing(_data)
-  
-    
+ 
+     //top 10
+
+
 
 
 
@@ -38,26 +40,16 @@ function initDashboard(_data) {
   
 
     //  SVG containerss
-    chart2 = d3.select("#chart2").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
+    
+
+    //  SVG container
+    chart3 = dataPreprocessing.createCorrelationHeatMap()
 
 
     //  SVG container
-    chart3 = d3.select("#chart3").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
+    chart2 = dataPreprocessing.createBarChart()
 
-
-    //  SVG container
-    chart4 = d3.select("#chart4").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
-
-
+    
     createChart1();
     createChart2();
     createChart3();
