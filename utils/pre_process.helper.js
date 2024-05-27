@@ -4,8 +4,10 @@
  class DataPreprocessing {
    //initialization of the data
 
-   constructor(data) {
+   constructor(data, countries) {
      this.data = data;
+     this.countries = countries
+
    }
    /** check if dataset has null values */
    prepocessCharacters() {
@@ -88,47 +90,6 @@
        .attr("stroke", "#fff"); // Add stroke for better visualization
    }
 
-   calculateCorrelations() {
-     /* // Extract the attributes into separate arrays  
-    const attributes = [];  
-    for (let i = 1; i < 12; i++) {  
-      attributes.push(this.data.map((row) => parseFloat(row[i])));  
-    }  
-  
-    // Calculate the mean of each attribute  
-    const means = attributes.map((attribute) => attribute.reduce((sum, value) => sum + value, 0) / attribute.length);  
-  
-    // Calculate the covariance matrix  
-    const covarianceMatrix = [];  
-    for (let i = 0; i < 12; i++) {  
-      covarianceMatrix[i] = [];  
-      for (let j = 0; j < 12; j++) {  
-        let covariance = 0;  
-        for (let k = 0; k < this.data.length; k++) {  
-          covariance += (attributes[i][k] - means[i]) * (attributes[j][k] - means[j]);  
-        }  
-        covariance /= this.data.length;  
-        covarianceMatrix[i][j] = covariance;  
-      }  
-    }  
-  
-    // Calculate the standard deviation of each attribute  
-    const stdDeviations = attributes.map((attribute) => Math.sqrt(attribute.reduce((sum, value) => sum + Math.pow(value - means[i], 2), 0) / attribute.length));  
-  
-    // Calculate the correlation matrix  
-    const correlationMatrix = [];  
-    for (let i = 0; i < 12; i++) {  
-      correlationMatrix[i] = [];  
-      for (let j = 0; j < 12; j++) {  
-        const correlation = covarianceMatrix[i][j] / (stdDeviations[i] * stdDeviations[j]);  
-        correlationMatrix[i][j] = correlation;  
-      }  
-    }  
-  
-    console.log(correlationMatrix); */
-   }
-
-   // Usage:
 
    updateFilterByYear() {}
 
@@ -182,7 +143,6 @@
        });
      });
 
-   
      // Set up heatmap dimensions
      var margin = { top: 50, right: 50, bottom: 50, left: 50 };
      var width = 500 - margin.left - margin.right;
@@ -201,7 +161,7 @@
      var colorScale = d3.scaleSequential(d3.interpolateRdBu).domain([-1, 1]); // Adjust domain based on correlation values
 
      // Create heatmap rectangles
-       svg
+     svg
        .selectAll(".heatmap")
        .data(correlationMatrix)
        .enter()
@@ -218,43 +178,52 @@
        .attr("height", height / years.length)
        .style("fill", (d) => colorScale(d));
 
-       // Add color scale legend
-var legendWidth = 100;
-var legendHeight = 20;
-var legend = svg.append("g")
-    .attr("class", "legend")
-    .attr("transform", "translate(" + (width - legendWidth) + "," + (height - legendHeight) + ")");
+     // Add color scale legend
+     var legendWidth = 100;
+     var legendHeight = 20;
+     var legend = svg
+       .append("g")
+       .attr("class", "legend")
+       .attr(
+         "transform",
+         "translate(" +
+           (width - legendWidth) +
+           "," +
+           (height - legendHeight) +
+           ")"
+       );
 
-var legendScale = d3.scaleLinear()
-    .domain([-1, 1])
-    .range([0, legendWidth]);
+     var legendScale = d3.scaleLinear().domain([-1, 1]).range([0, legendWidth]);
 
-var legendAxis = d3.axisBottom(legendScale)
-    .ticks(5)
-    .tickFormat(d3.format(".1f"));
+     var legendAxis = d3
+       .axisBottom(legendScale)
+       .ticks(5)
+       .tickFormat(d3.format(".1f"));
 
-legend.append("g")
-    .attr("class", "legend-axis")
-    .attr("transform", "translate(0," + legendHeight + ")")
-    .call(legendAxis);
+     legend
+       .append("g")
+       .attr("class", "legend-axis")
+       .attr("transform", "translate(0," + legendHeight + ")")
+       .call(legendAxis);
 
-// Add labels to heatmap cells
-var cellLabels = svg.selectAll(".cell-label")
-    .data(correlationMatrix)
-    .enter().append("g")
-    .attr("class", "cell-label")
-    .selectAll(".label")
-    .data((d, i) => d.map((value, j) => ({ value, i, j })))
-    .enter().append("text")
-    .attr("class", "label")
-    .attr("x", d => (d.j + 0.5) * (width / years.length))
-    .attr("y", d => (d.i + 0.5) * (height / years.length))
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "middle")
-    .style("fill", "black")
-    .text(d => d3.format(".2f")(d.value));
-
-       
+     // Add labels to heatmap cells
+     svg
+       .selectAll(".cell-label")
+       .data(correlationMatrix)
+       .enter()
+       .append("g")
+       .attr("class", "cell-label")
+       .selectAll(".label")
+       .data((d, i) => d.map((value, j) => ({ value, i, j })))
+       .enter()
+       .append("text")
+       .attr("class", "label")
+       .attr("x", (d) => (d.j + 0.5) * (width / years.length))
+       .attr("y", (d) => (d.i + 0.5) * (height / years.length))
+       .attr("dy", "0.35em")
+       .attr("text-anchor", "middle")
+       .style("fill", "black")
+       .text((d) => d3.format(".2f")(d.value));
    }
 
    top10CountryHighestGdp() {
@@ -270,7 +239,7 @@ var cellLabels = svg.selectAll(".cell-label")
      let top10 = this.top10CountryHighestGdp();
 
      const margin = { top: 20, right: 20, bottom: 40, left: 40 };
-     const width = 600 - margin.left - margin.right;
+     const width = 500 - margin.left - margin.right;
      const height = 400 - margin.top - margin.bottom;
 
      // Create an SVG container
@@ -339,6 +308,108 @@ var cellLabels = svg.selectAll(".cell-label")
          x(parseFloat(d[year].toString().replace(/,/g, "")))
        )
        .attr("height", y.bandwidth());
+   }
+
+   createLineChart() {
+     const lineChartWidth = 500;
+     const lineChartHeight = 400;
+     const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+
+     const svg = d3
+       .select("#chart3")
+       .append("svg")
+       .attr("width", lineChartWidth + margin.left + margin.right)
+       .attr("height", lineChartHeight + margin.top + margin.bottom)
+       .append("g")
+       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+     // Prepare the data
+     const parseYear = d3.timeParse("%Y");
+     // Add other countries as needed
+     const selectedData = this.data.filter((d) =>
+       this.countries.includes(d.Country)
+     );
+
+     // Prepare scales and axes
+     const xScale = d3
+       .scaleTime()
+       .domain([parseYear(1999), parseYear(2022)])
+       .range([0, lineChartWidth]);
+
+     const yScale = d3
+       .scaleLinear()
+       .domain([
+         0,
+         d3.max(selectedData, (d) =>
+           d3.max(
+             Object.keys(d)
+               .filter((k) => k.match(/^\d{4}$/))
+               .map((k) => +d[k])
+           )
+         ),
+       ])
+       .range([lineChartHeight, 0]);
+
+     const xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y"));
+     const yAxis = d3.axisLeft(yScale);
+
+     // Draw axes
+     svg
+       .append("g")
+       .attr("transform", "translate(0," + lineChartHeight + ")")
+       .call(xAxis);
+
+     svg.append("g").call(yAxis);
+
+     // Draw lines
+     const line = d3
+       .line()
+       .x((d) => xScale(parseYear(d.year)))
+       .y((d) => yScale(d.value));
+
+     const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+     selectedData.forEach((countryData, index) => {
+       const country = countryData.Country;
+       const data = Object.keys(countryData)
+         .filter((k) => k.match(/^\d{4}$/))
+         .map((k) => ({ year: k, value: +countryData[k] }));
+
+       svg
+         .append("path")
+         .datum(data)
+         .attr("fill", "none")
+         .attr("stroke", colors(index))
+         .attr("stroke-width", 1.5)
+         .attr("d", line)
+         .attr("class", "line")
+         .append("title")
+         .text(country);
+     });
+
+     // Add legend
+     const legend = svg
+       .selectAll(".legend")
+       .data(countries)
+       .enter()
+       .append("g")
+       .attr("class", "legend")
+       .attr("transform", (d, i) => "translate(0," + i * 20 + ")");
+
+     legend
+       .append("rect")
+       .attr("x", lineChartWidth - 18)
+       .attr("width", 18)
+       .attr("height", 18)
+       .style("fill", (d, i) => colors(i));
+
+     legend
+       .append("text")
+       .attr("x", lineChartWidth - 24)
+       .attr("y", 9)
+       .attr("dy", ".35em")
+       .style("text-anchor", "end")
+       .text((d) => d);
    }
 
    // Call the createHistogram function
