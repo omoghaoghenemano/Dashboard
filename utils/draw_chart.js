@@ -1,34 +1,30 @@
-/** handle data preprocessing 
+/** handle data preprocessing
  * @param data the dataset
-*/
+ */
 class DrawChart extends PreprocessData {
   //initialization of the data
 
   constructor(data, countries, selectedYear, chart1, chart2, chart3, chart4) {
-    super(data, selectedYear)
+    super(data, selectedYear);
     this.data = data;
-    this.countries = countries
-    this.selectedYear = selectedYear
-    this.chart1 = chart1
-    this.chart2 = chart2
-    this.chart3 = chart3
-    this.chart4 = chart4
-
-
+    this.countries = countries;
+    this.selectedYear = selectedYear;
+    this.chart1 = chart1;
+    this.chart2 = chart2;
+    this.chart3 = chart3;
+    this.chart4 = chart4;
   }
-
 
   //set selected year
   setSelectedYear(year) {
-
     this.selectedYear = year;
 
-    console.log("is year updated", this.selectedYear)
+    console.log("is year updated", this.selectedYear);
   }
   /** render world map of country */
   renderMap(world) {
-
-    var width = 600;
+    // Get the screen width
+    var width = window.innerWidth;
     var height = 500;
 
     var projection = d3
@@ -44,16 +40,17 @@ class DrawChart extends PreprocessData {
       gdpMap[country.Country] = country[this.selectedYear]; // Change this to the desired year
     });
 
-
+    // Extract and filter GDP values
+    var gdpValues = Object.values(gdpMap)
+      .map((value) => parseFloat(value))
+      .filter((value) => !isNaN(value));
 
     // Create color scale based on GDP values
     var colorScale = d3
-      .scaleSequential()
-      .domain([d3.max(data, d => d[this.selectedYear]), 0]) // Reverse domain
-      .interpolator(d3.interpolateYlGnBu);
+      .scaleSequential(d3.interpolateYlGnBu)
+      .domain([d3.min(gdpValues), d3.max(gdpValues)]); // Ensure higher values are brighter
 
     // Append SVG element
-
     this.chart1 = d3
       .select("#chart1")
       .append("svg")
@@ -61,7 +58,8 @@ class DrawChart extends PreprocessData {
       .attr("height", height);
 
     // Load world map data
-    var countryNames = this.get_country()
+    var countryNames = this.get_country();
+
     // Draw countries
     this.chart1
       .selectAll("path")
@@ -71,33 +69,109 @@ class DrawChart extends PreprocessData {
       .attr("d", path)
       .attr("fill", function (d) {
         var names = countryNames[d.id];
-        return gdpMap[names] ? colorScale(d.id) : "#ccc"; // Fallback color for missing data
+        return gdpMap[names] ? colorScale(gdpMap[names]) : "none"; // Use "none" for no fill
       })
-      .attr("stroke", "#fff") // Add stroke for better visualization
+      .style("stroke", function (d) {
+        var names = countryNames[d.id];
+        return gdpMap[names] ? "none" : "#ccc"; // Use a light gray for stroke if no data
+      })
+      .style("stroke-dasharray", function (d) {
+        var names = countryNames[d.id];
+        return gdpMap[names] ? "0" : "3"; // Apply dashed stroke only if no data
+      })
       .on("mouseover", function (event, d) {
-
         var names = countryNames[d.id];
 
-        tooltip.transition().duration(200).style("opacity", .9);
-        tooltip.html("Country: " + names + "<br>GDP: " + gdpMap[names])
-          .style("left", (event.pageX) + "px")
-          .style("top", (event.pageY - 28) + "px");
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip
+          .html("Country: " + names + "<br>GDP: " + gdpMap[names])
+          .style("left", event.pageX + "px")
+          .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", function (event, d) {
-
         tooltip.transition().duration(500).style("opacity", 0);
       });
 
     // Tooltip for hover effect
-    var tooltip = d3.select("body").append("div")
+    var tooltip = d3
+      .select("body")
+      .append("div")
       .attr("class", "tooltip")
       .style("opacity", 0);
+
+    // Append a group element for the legend
+    var legendWidth = 300;
+    var legendHeight = 10;
+
+    var legend = this.chart1
+      .append("g")
+      .attr("class", "legend")
+      .attr(
+        "transform",
+        "translate(" + (width - legendWidth) / 2 + "," + (height - 30) + ")"
+      );
+
+    // Create a gradient for the legend
+    var defs = this.chart1.append("defs");
+
+    var linearGradient = defs
+      .append("linearGradient")
+      .attr("id", "linear-gradient");
+
+    linearGradient
+      .selectAll("stop")
+      .data(d3.range(0, 1.1, 0.1))
+      .enter()
+      .append("stop")
+      .attr("offset", (d) => d)
+      .attr("stop-color", (d) =>
+        colorScale(
+          d3.min(gdpValues) + d * (d3.max(gdpValues) - d3.min(gdpValues))
+        )
+      );
+
+    // Draw the rectangle and fill with gradient
+    legend
+      .append("rect")
+      .attr("width", legendWidth)
+      .attr("height", legendHeight)
+      .style("fill", "url(#linear-gradient)");
+
+    // Create a scale for the legend
+    var xScale = d3
+      .scaleLinear()
+      .domain([d3.min(gdpValues), d3.max(gdpValues)])
+      .range([0, legendWidth]);
+
+    // Add an axis for the legend
+    var xAxis = d3.axisBottom(xScale).ticks(5).tickSize(legendHeight);
+
+    legend
+      .append("g")
+      .attr("transform", "translate(0," + legendHeight + ")")
+      .call(xAxis)
+      .select(".domain")
+      .remove();
+
+    // Handle window resize
+    window.addEventListener("resize", () => {
+      // Update the width
+      width = window.innerWidth;
+      // Update the projection translation
+      projection.translate([width / 2, height / 2]);
+      // Update the SVG width
+      d3.select("svg").attr("width", width);
+      // Update paths
+      d3.selectAll("path").attr("d", path);
+      // Update the legend position
+      legend.attr(
+        "transform",
+        "translate(" + (width - legendWidth) / 2 + "," + (height - 30) + ")"
+      );
+    });
   }
 
-
-
-  updateFilterByYear() { }
-
+  updateFilterByYear() {}
 
   createCorrelationHeatMap() {
     // Assuming gdpData is your dataset
@@ -161,10 +235,10 @@ class DrawChart extends PreprocessData {
       .attr(
         "transform",
         "translate(" +
-        (width - legendWidth) +
-        "," +
-        (height - legendHeight) +
-        ")"
+          (width - legendWidth) +
+          "," +
+          (height - legendHeight) +
+          ")"
       );
 
     var legendScale = d3.scaleLinear().domain([-1, 1]).range([0, legendWidth]);
@@ -270,9 +344,7 @@ class DrawChart extends PreprocessData {
       .attr("class", "bar")
       .attr("x", x(0))
       .attr("y", (d) => y(d.Country))
-      .attr("width", (d) =>
-        x(parseFloat(d[year].toString().replace(/,/g, "")))
-      )
+      .attr("width", (d) => x(parseFloat(d[year].toString().replace(/,/g, ""))))
       .attr("height", y.bandwidth());
   }
 
@@ -281,7 +353,6 @@ class DrawChart extends PreprocessData {
     this.chart2.selectAll("*").remove();
     this.chart3.selectAll("*").remove();
     this.chart4.selectAll("*").remove();
-
   }
 
   createLineChart() {
@@ -388,4 +459,3 @@ class DrawChart extends PreprocessData {
 
   // Call the createHistogram function
 }
-

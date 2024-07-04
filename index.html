@@ -11,12 +11,15 @@
 -->
 
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Data Visualization Exercise</title>
 
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link
+      rel="stylesheet"
+      href="http://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    />
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
     <!-- include d3 -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -30,129 +33,145 @@
     <!-- PART 2: include scripts for the dashboard -->
     <script src="utils/pre_process_data.js"></script>
     <script src="utils/draw_chart.js"></script>
-    <script src="dashboard.js"  ></script>
-    
+    <script src="dashboard.js"></script>
+  </head>
 
-</head>
+  <!-- call init function when page has loaded -->
+  <body onload="init()">
+    <h1>Data Visualization Exercise</h1>
 
-<!-- call init function when page has loaded -->
-<body onload="init()">
+    <!-- credits -->
+    <div id="credits">
+      Created by
+      <span class="instructions">Oghenemano Utomudo Omogha </span> for the Data
+      Visualization Lecture at
+      <a href="https://www.fim.uni-passau.de/digitale-bildverarbeitung">
+        Faculty of Computer Science and Mathematics - Chair of Cognitive sensor
+        systems - University of Passau</a
+      >.
+    </div>
 
-<h1>Data Visualization Exercise</h1>
+    <!-- create buttons to select tabs -->
+    <button
+      class="tablink"
+      onclick="openPage('DataLoading', this, 'blue')"
+      id="defaultOpen"
+    >
+      Data Loading
+    </button>
+    <button
+      class="tablink"
+      onclick="openPage('BasicVisualization', this, 'blue')"
+    >
+      Basic Visualization
+    </button>
+    <button class="tablink" onclick="openPage('Dashboard', this, 'blue')">
+      Dashboard
+    </button>
 
-<!-- credits -->
-<div id="credits">
-    Created by <span class="instructions">Oghenemano Utomudo Omogha </span>
-    for the Data Visualization Lecture at <a href="https://www.fim.uni-passau.de/digitale-bildverarbeitung"> Faculty of Computer
-    Science and Mathematics - Chair of Cognitive sensor systems - University of Passau</a>.
-</div>
+    <!-- Tab 1 -->
+    <div id="DataLoading" class="tabcontent">
+      <!-- data selector -->
+      <p>Select your data here: <input id="upload" type="file" /></p>
 
-<!-- create buttons to select tabs -->
-<button class="tablink" onclick="openPage('DataLoading', this, 'blue')" id="defaultOpen" >Data Loading</button>
-<button class="tablink" onclick="openPage('BasicVisualization', this, 'blue')">Basic Visualization</button>
-<button class="tablink" onclick="openPage('Dashboard', this, 'blue')">Dashboard</button>
+      <!-- data table -->
+      <div id="dataTable"></div>
+    </div>
 
-<!-- Tab 1 -->
-<div id="DataLoading" class="tabcontent">
-
-    <!-- data selector -->
-    <p>Select your data here: <input id="upload" type="file"></p>
-
-    <!-- data table -->
-    <div id="dataTable"></div>
-
-</div>
-
-<!-- Tab 2 -->
-<div id="BasicVisualization" class="tabcontent">
-
-    <!-- scatterplot -->
-    <div class="container">
+    <!-- Tab 2 -->
+    <div id="BasicVisualization" class="tabcontent">
+      <!-- scatterplot -->
+      <div class="container">
         <!-- scatterplot menu -->
         <h2>Scatterplot</h2>
 
-        <p>Select dimensions to be displayed here: </p>
+        <p>Select dimensions to be displayed here:</p>
         <div id="menu">
-            <form action="#">
-                <fieldset>
-                    <label for="scatterX">x axis: </label>
-                    <select name="scatterX" id="scatterX">
-                    </select>
-                    <br/>
-                    <label for="scatterY">y axis: </label>
-                    <select name="scatterY" id="scatterY">
-                    </select>
-                    <br/>
-                    <label for="size">size: </label>
-                    <select name="size" id="size">
-                    </select>
-                </fieldset>
-            </form>
+          <form action="#">
+            <fieldset>
+              <label for="scatterX">x axis: </label>
+              <select name="scatterX" id="scatterX"></select>
+              <br />
+              <label for="scatterY">y axis: </label>
+              <select name="scatterY" id="scatterY"></select>
+              <br />
+              <label for="size">size: </label>
+              <select name="size" id="size"></select>
+            </fieldset>
+          </form>
         </div>
-        <!-- scatterplot SVG --> 
+        <!-- scatterplot SVG -->
         <div id="sp"></div>
-    </div>
+      </div>
 
-    <!-- radar chart -->
-    <div class="container">
+      <!-- radar chart -->
+      <div class="container">
         <h2>Radar Chart</h2>
         <!-- radar chart SVG -->
         <div id="radar"></div>
-        <div id="legend">
-            <b>Legend:</b><br/>
-        </div>
+        <div id="legend"><b>Legend:</b><br /></div>
+      </div>
     </div>
 
-</div>
+    <!-- Tab 3 -->
+    <div id="Dashboard" class="tabcontent">
+      <h1>Global GDP Analysis</h1>
 
-<!-- Tab 3 -->
-<div id="Dashboard" class="tabcontent">
-    <h1>Global GDP Analysis</h1>
+      <div class="filter">
+        Year:
+        <select id="yearFilter"></select>
+      </div>
+      <!-- TODO: The environment of your dashboard can be freely customized. Here is a general layout to get you started. -->
 
-    <div class="filter">
-         Year: <select id="yearFilter"></select>
-        </div>
-    <!-- TODO: The environment of your dashboard can be freely customized. Here is a general layout to get you started. -->
-
-    <!-- Grid container -->
-    <div class="dashboardGrid">
-
-        <!-- chart 1 -->
-        <div class="container">
-            <h2>Visualizing GDP by Country</h2>
-            <p>This map shows the GDP levels of countries around the world. Countries are shaded according to their GDP levels, providing a visual representation of economic distribution globally.</p>
-       <!-- radar chart SVG -->
-            <div id="chart1"></div>
-        </div>
-
+      <!-- chart 1 -->
+      <div class="container">
+        <h2>Visualizing GDP by Country</h2>
+        <p>
+          This map shows the GDP levels of countries around the world. Countries
+          are shaded according to their GDP levels, providing a visual
+          representation of economic distribution globally.
+        </p>
+        <!-- radar chart SVG -->
+        <div id="chart1"></div>
+      </div>
+      <!-- Grid container -->
+      <div class="dashboardGrid">
         <!-- chart 2 -->
         <div class="container">
-            <h2>Top 10 Countries by GDP</h2>
-        <p>This bar chart highlights the top 10 countries with the highest nominal GDP. It provides a quick comparison of the economic size of these leading nations.</p>
-        <!-- radar chart SVG -->
-            <div id="chart2"></div>
+          <h2>Top 10 Countries by GDP</h2>
+          <p>
+            This bar chart highlights the top 10 countries with the highest
+            nominal GDP. It provides a quick comparison of the economic size of
+            these leading nations.
+          </p>
+          <!-- radar chart SVG -->
+          <div id="chart2"></div>
         </div>
 
         <!-- chart 3 -->
         <div class="container">
-            <h2>GDP Trends Over Time</h2>
-            <p>This line chart illustrates the GDP trends over time for selected countries. It allows for an analysis of economic growth and fluctuations over the years.</p>
-      <!-- radar chart SVG -->
-            <div id="chart3"></div>
+          <h2>GDP Trends Over Time</h2>
+          <p>
+            This line chart illustrates the GDP trends over time for selected
+            countries. It allows for an analysis of economic growth and
+            fluctuations over the years.
+          </p>
+          <!-- radar chart SVG -->
+          <div id="chart3"></div>
         </div>
 
         <!-- chart 4 -->
         <div class="container">
-            <h2>Correlation of GDP Among Countries</h2>
-            <p>The heatmap displays the correlation of GDP among different countries over time. It helps to identify patterns and relationships in economic performance across countries.</p>
-        <!-- radar chart SVG -->
-            <div id="chart4"></div>
+          <h2>Correlation of GDP Among Countries</h2>
+          <p>
+            The heatmap displays the correlation of GDP among different
+            countries over time. It helps to identify patterns and relationships
+            in economic performance across countries.
+          </p>
+          <!-- radar chart SVG -->
+          <div id="chart4"></div>
         </div>
-
+      </div>
     </div>
-
-</div>
-
-
-</body>
+  </body>
 </html>
