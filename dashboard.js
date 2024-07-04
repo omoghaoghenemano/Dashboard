@@ -17,35 +17,58 @@
 // TODO: You can edit this file as you wish - add new methods, variables etc. or change/delete existing ones.
 
 // TODO: use descriptive names for variables
-let chart1, chart2, chart3, chart4, countries;
+let chart1, chart2, chart3, chart4, countries, selectedYear;
+let drawchart,  worldjsoninfo, dashboard_data;
+
+
+
 
 function initDashboard(_data) {
+   
+    dashboard_data = data
+    // TODO: Initialize the environment (SVG, etc.) and call the needed methods
+    countries = ['Nigeria', 'Ghana'];
+    selectedYear = 2000;
 
-    // TODO: Initialize the environment (SVG, etc.) and call the nedded methods
-     countries = ['Nigeria', 'Ghana']
-    
-     const dataPreprocessing = new DataPreprocessing(_data, countries)
- 
-     //top 10
+    drawchart = new DrawChart(_data, countries, selectedYear, chart1, chart2, chart3, chart4);
 
- 
-    d3.json("https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json").then(function(data) {  
-        dataPreprocessing.renderMap(data);  
-    }); 
+    d3.json("https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json").then(function(info) {
+        console.log("the data", info);
+        worldjsoninfo = info
+        drawchart.renderMap(info);
+    });
 
-  
+    drawchart.populateFilterWithYear();
 
-    //  SVG containerss
-    
-    //
-    dataPreprocessing.createBarChart()
-    dataPreprocessing.createLineChart()
-    //  SVG container
-    dataPreprocessing.createCorrelationHeatMap()
-  
+    // Initial rendering of charts
+    drawchart.createBarChart();
+    drawchart.createLineChart();
+    drawchart.createCorrelationHeatMap();
 
-
+    // Attach the update function to the year filter dropdown
+    document.getElementById("yearFilter").addEventListener("change", update);
 }
+
+
+
+function update() {
+    // Get the new selected year
+
+    selectedYear = document.getElementById("yearFilter").value;
+    console.log("Year selected:", selectedYear);
+   
+    // Update the DrawChart instance with the new year
+    drawchart.setSelectedYear(selectedYear);
+
+    // Clear the existing charts if needed
+    drawchart.clearChart()
+     // Redraw the charts with the new data
+    drawchart.createBarChart();
+    drawchart.createLineChart();
+    drawchart.createCorrelationHeatMap();
+    drawchart.renderMap(worldjsoninfo);
+}
+
 
 
 

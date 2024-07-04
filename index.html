@@ -28,8 +28,10 @@
     <!-- PART 1: include dataVis script -->
     <script src="dataVis.js"></script>
     <!-- PART 2: include scripts for the dashboard -->
+    <script src="utils/pre_process_data.js"></script>
+    <script src="utils/draw_chart.js"></script>
     <script src="dashboard.js"  ></script>
-    <script src="utils/pre_process.helper.js"></script>
+    
 
 </head>
 
@@ -87,7 +89,7 @@
                 </fieldset>
             </form>
         </div>
-        <!-- scatterplot SVG -->
+        <!-- scatterplot SVG --> 
         <div id="sp"></div>
     </div>
 
@@ -107,7 +109,9 @@
 <div id="Dashboard" class="tabcontent">
     <h1>Global GDP Analysis</h1>
 
-    <div class="filter">Filters:</div>
+    <div class="filter">
+         Year: <select id="yearFilter"></select>
+        </div>
     <!-- TODO: The environment of your dashboard can be freely customized. Here is a general layout to get you started. -->
 
     <!-- Grid container -->
