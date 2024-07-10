@@ -14,10 +14,10 @@
 
 // TODO: use descriptive names for variables
 let chart1, chart2, chart3, chart4;
-let countries = ["Nigeria", "Ghana"];
+let countries = [];
 let selectedYear;
 let drawchart, worldsoninfo, dashboard_data;
-
+const colors = d3.scaleOrdinal(d3.schemeCategory10);
 document.addEventListener("DOMContentLoaded", function () {
   // Select chart elements from the DOM using D3
   chart1 = d3.select("#chart1"); // Adjust with your actual selector
@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function initDashboard(_data) {
+
   dashboard_data = data;
+
   // TODO: Initialize the environment (SVG, etc.) and call the needed methods
   //   countries = ["Nigeria", "Ghana"];
   selectedYear = 2000;
@@ -42,7 +44,8 @@ function initDashboard(_data) {
     chart1,
     chart2,
     chart3,
-    chart4
+    chart4,
+    colors
   );
 
   d3.json(
@@ -63,7 +66,9 @@ function initDashboard(_data) {
   // Initial rendering of charts
   drawchart.createBarChart();
   drawchart.createLineChart();
-  drawchart.createCorrelationHeatMap();
+  drawchart.drawPieChart()
+
+  
 
   // Attach the update function to the year filter dropdown
   document.getElementById("yearFilter").addEventListener("change", update);
@@ -79,14 +84,26 @@ function update() {
   drawchart.setSelectedYear(selectedYear);
 
   // Clear the existing charts if needed
-  drawchart.clearChart();
+  clearDashboard()
 
   // Redraw the charts with the new data
   drawchart.createBarChart();
   drawchart.createLineChart();
-  drawchart.createCorrelationHeatMap();
   drawchart.renderMap(worldjsoninfo);
+  drawchart.drawPieChart()
 }
+
+function updateCountries(countries){
+  drawchart.setSelectedCountries(countries)
+}
+
+function updateLineChart(){
+  console.log("data", countries)
+  if (chart3) chart3.selectAll("*").remove();
+  drawchart.createLineChart()
+}
+
+
 
 // clear files if changes (dataset) occur
 function clearDashboard() {

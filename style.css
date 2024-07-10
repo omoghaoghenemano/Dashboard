@@ -17,6 +17,10 @@ body {
     color: darkgreen;
 }
 
+.maplegend{
+    margin-left: 70%;
+}
+
 /* Style tab links */
 .tablink {
     background-color: #555;

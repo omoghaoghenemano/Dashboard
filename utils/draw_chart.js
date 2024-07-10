@@ -4,32 +4,306 @@
 class DrawChart extends PreprocessData {
   //initialization of the data
 
-  constructor(data, countries, selectedYear, chart1, chart2, chart3, chart4) {
+  constructor(data, countries, selectedYear, chart1, chart2, chart3, chart4,colors) {
     super(data, selectedYear);
-    this.data = data;
+    this.data = this.format_dataset(data);
     this.countries = countries;
     this.selectedYear = selectedYear;
     this.chart1 = chart1;
     this.chart2 = chart2;
     this.chart3 = chart3;
     this.chart4 = chart4;
+    this.colors = colors
+    
   }
 
   //set selected year
   setSelectedYear(year) {
     this.selectedYear = year;
 
-    console.log("is year updated", this.selectedYear);
   }
+
+
+ 
+  setSelectedCountries(countries) {  
+    this.countries = countries;  
+}  
+
+    // Method to draw Pie Chart: GDP Distribution by Continent  
+    drawPieChart() {  
+      // Aggregate GDP by continent  
+      const continentGDP = {};  
+      this.data.forEach((country) => {  
+        const continent = country.Continent; // Assuming your data has a 'Continent' field  
+        const gdp = parseFloat(country[this.selectedYear]);  
+        if (!isNaN(gdp) && continent !== 'Unknown') {  
+          if (continentGDP[continent]) {  
+            continentGDP[continent] += gdp;  
+          } else {  
+            continentGDP[continent] = gdp;  
+          }  
+        }  
+      });  
+    
+      // Convert the aggregated data into an array suitable for D3 pie chart  
+      const pieData = Object.keys(continentGDP).map((continent) => ({  
+        continent: continent,  
+        gdp: continentGDP[continent],  
+      }));  
+    
+      const width = 500;  
+      const height = 300;  
+      const radius = Math.min(width, height) / 2;  
+    
+       
+    
+      const pie = d3.pie().value((d) => d.gdp);  
+    
+      const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);  
+    
+      const labelArc = d3.arc().outerRadius(radius - 40).innerRadius(radius - 40);  
+      const colors = d3.scaleOrdinal(d3.schemeCategory10);
+      const svg = d3  
+        .select("#chart4") // Assuming you want to draw the pie chart in chart2  
+        .append("svg")  
+        .attr("width", width)  
+        .attr("height", height)  
+        .append("g")  
+        .attr("transform", `translate(${width / 2},${height / 2})`);  
+    
+      const g = svg  
+        .selectAll(".arc")  
+        .data(pie(pieData))  
+        .enter()  
+        .append("g")  
+        .attr("class", "arc");  
+    
+        g.append("path")  
+        .attr("d", arc)  
+        .style("fill", (d) => colors(d.data.continent))  
+        .transition()  
+        .duration(1000)  
+        .attrTween("d", function (d) {  
+            const interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);  
+            return function (t) {  
+                return arc(interpolate(t));  
+            };  
+        });
+      g.append("text")  
+        .attr("transform", (d) => `translate(${labelArc.centroid(d)})`)  
+        .attr("dy", ".35em")  
+        .text((d) => d.data.continent);  
+    
+        // Optional: Add a legend  
+        const legend = svg  
+        .selectAll(".legend")  
+        .data(colors.domain())  
+        .enter()  
+        .append("g")  
+        .attr("class", "legend")  
+        .attr("transform", (d, i) => `translate(-35,${i * 20 - height / 2})`);  
+    
+      legend  
+        .append("rect")  
+        .attr("x", width / 2 - 18)  
+        .attr("width", 18)  
+        .attr("height", 18)  
+        .style("fill", colors);  
+    
+      legend  
+        .append("text")  
+        .attr("x", width / 2 - 24)  
+        .attr("y", 9)  
+        .attr("dy", ".35em")  
+        .style("text-anchor", "end")  
+        .text((d) => d);  
+    }  
+    
+    createLineChart() {
+      const lineChartWidth = 500;
+      const lineChartHeight = 300;
+      const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+  
+      this.chart3 = d3
+        .select("#chart3")
+        .append("svg")
+        .attr("width", lineChartWidth + margin.left + margin.right)
+        .attr("height", lineChartHeight + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+        console.log("did countries update", this.countries)
+      // Prepare the data
+      const parseYear = d3.timeParse("%Y");
+
+      if(this.countries.length < 1){
+        let top = this.top10CountryHighestGdp()
+        //use only top 10 countries if the array length is less 1
+        let countriesArray = Array.from(top).map(d => d.Country);
+        this.countries = countriesArray
+    
+      }
+      // Add other countries as needed
+      const selectedData = this.data.filter((d) =>
+        this.countries.includes(d.Country)
+      );
+  
+      // Prepare scales and axes
+      const xScale = d3
+        .scaleTime()
+        .domain([parseYear(1980), parseYear(2022)])
+        .range([0, lineChartWidth]);
+  
+      const yScale = d3
+        .scaleLinear()
+        .domain([
+          0,
+          d3.max(selectedData, (d) =>
+            d3.max(
+              Object.keys(d)
+                .filter((k) => k.match(/^\d{4}$/))
+                .map((k) => +d[k])
+            )
+          ),
+        ])
+        .range([lineChartHeight, 0]);
+
+      // Calculate tick values for every 5 years  
+  const tickValues = [];  
+  for (let year = 1980; year <= 2022; year += 5) {  
+    tickValues.push(parseYear(year.toString()));  
+  }  
+  
+  const xAxis = d3.axisBottom(xScale).tickValues(tickValues).tickFormat(d3.timeFormat("%Y"));  
+  const yAxis = d3.axisLeft(yScale);  
+  // Define the brush  
+// Define the brush  
+const brush = d3.brushX()  
+  .extent([[0, 0], [lineChartWidth, lineChartHeight]])  
+  .on("brush end", this.brushed);  
+  
+// Add the brush to the chart  
+this.chart3.append("g")  
+  .attr("class", "brush")  
+  .call(brush);  
+  
+this.chart3  
+  .append("g")  
+  .attr("transform", "translate(0," + lineChartHeight + ")")  
+  .call(xAxis);  
+  
+this.chart3.append("g").call(yAxis);  
+  // Draw lines  
+  const line = d3  
+    .line()  
+    .x((d) => xScale(parseYear(d.year)))  
+    .y((d) => yScale(d.value));  
+    
+  selectedData.forEach((countryData, index) => {  
+    const country = countryData.Country;  
+    const data = Object.keys(countryData)  
+      .filter((k) => k.match(/^\d{4}$/))  
+      .map((k) => ({ year: k, value: +countryData[k] }));  
+    
+    const path = this.chart3  
+      .append("path")  
+      .datum(data)  
+      .attr("fill", "none")  
+      .attr("stroke", this.colors(index))  
+      .attr("stroke-width", 1.5)  
+      .attr("class", "line")  
+      .attr("d", line)  
+      .attr("title", country); // Move title attribute directly to the path  
+    
+    // Get the total length of the path  
+    const totalLength = path.node().getTotalLength();  
+    
+    path  
+      .attr("stroke-dasharray", totalLength + " " + totalLength)  
+      .attr("stroke-dashoffset", totalLength)  
+      .transition()  
+      .duration(2000)  
+      .attr("stroke-dashoffset", 0);  
+    
+    this.chart3  
+      .selectAll(".dot" + index) // Unique class for each country  
+      .data(data)  
+      .enter()  
+      .append("circle")  
+      .attr("class", "dot" + index)  
+      .attr("cx", (d) => xScale(parseYear(d.year)))  
+      .attr("cy", (d) => yScale(d.value))  
+      .attr("r", 3)  
+      .attr("fill", this.colors(index))  
+      .attr("opacity", 0)  
+      .transition()  
+      .duration(2000)  
+      .attr("opacity", 1);  
+  });  
+   
+    
+      
+      // Add legend
+      const legend = this.chart3
+        .selectAll(".legend")
+        .data(this.countries)
+        .enter()
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => "translate(0," + i * 20 + ")");
+  
+      legend
+        .append("rect")
+        .attr("x", lineChartWidth - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", (d, i) => this.colors(i));
+  
+      legend
+        .append("text")
+        .attr("x", lineChartWidth - 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text((d) => d);
+    }
+
+// Brushing function  
+ brushed(event) {  
+  const selection = event.selection;  
+  if (selection === null) return; // If no selection, return  
+  
+  const [x0, x1] = selection.map(xScale.invert, xScale); // Get the selected range in the domain  
+  
+  // Update the xScale domain based on the brush selection  
+  xScale.domain([x0, x1]);  
+  
+  // Redraw the axes with the updated scale  
+  this.chart3.select(".x-axis").call(xAxis);  
+  this.chart3.select(".y-axis").call(yAxis);  
+  
+  // Redraw the lines with the updated scale  
+  this.chart3.selectAll(".line")  
+    .attr("d", line);  
+  
+  // Redraw the circles with the updated scale  
+  selectedData.forEach((countryData, index) => {  
+    this.chart3.selectAll(".dot" + index)  
+      .attr("cx", (d) => xScale(parseYear(d.year)))  
+      .attr("cy", (d) => yScale(d.value));  
+  });  
+}  
+
   /** render world map of country */
   renderMap(world) {
     // Get the screen width
     var width = window.innerWidth;
-    var height = 500;
+    var height = 300;
+    
 
     var projection = d3
       .geoNaturalEarth1()
-      .scale(150)
+      .scale(100)
       .translate([width / 2, height / 2]);
 
     var path = d3.geoPath().projection(projection);
@@ -59,7 +333,8 @@ class DrawChart extends PreprocessData {
 
     // Load world map data
     var countryNames = this.get_country();
-
+    // Variable to keep track of the currently selected country  
+    var selectedCountries = new Set();
     // Draw countries
     this.chart1
       .selectAll("path")
@@ -79,9 +354,29 @@ class DrawChart extends PreprocessData {
         var names = countryNames[d.id];
         return gdpMap[names] ? "0" : "3"; // Apply dashed stroke only if no data
       })
-      .on("mouseover", function (event, d) {
-        var names = countryNames[d.id];
+      .on("click", function(event, d) {  
+        var names = countryNames[d.id];  
+        var countryPath = d3.select(this);  
+      
+        // Toggle the country's selection  
+        if (selectedCountries.has(names)) {  
+            selectedCountries.delete(names);  
+            countryPath.attr("fill", gdpMap[names] ? colorScale(gdpMap[names]) : "none");  
+        } else {  
+            selectedCountries.add(names);  
+            countryPath.attr("fill", "orange"); // or any color you prefer for highlighting  
+        }  
+        
+        var countries = [...selectedCountries]
 
+        updateCountries(countries)
+        updateLineChart()
+
+  
+
+    })  
+    .on("mouseover", function (event, d) {
+        var names = countryNames[d.id];
         tooltip.transition().duration(200).style("opacity", 0.9);
         tooltip
           .html("Country: " + names + "<br>GDP: " + gdpMap[names])
@@ -152,7 +447,7 @@ class DrawChart extends PreprocessData {
       .call(xAxis)
       .select(".domain")
       .remove();
-
+   
     // Handle window resize
     window.addEventListener("resize", () => {
       // Update the width
@@ -171,7 +466,6 @@ class DrawChart extends PreprocessData {
     });
   }
 
-  updateFilterByYear() {}
 
   createCorrelationHeatMap() {
     // Assuming gdpData is your dataset
@@ -277,10 +571,9 @@ class DrawChart extends PreprocessData {
   //create a bar chat
   createBarChart() {
     let top10 = this.top10CountryHighestGdp();
-
-    const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+    const margin = { top: 20, right: 20, bottom: 40, left: 140 };
     const width = 500 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const height = 300 - margin.top - margin.bottom;
 
     // Create an SVG container
     this.chart2 = d3
@@ -297,7 +590,7 @@ class DrawChart extends PreprocessData {
       .scaleLinear()
       .domain([
         0,
-        d3.max(top10, (d) => parseFloat(d[year].toString().replace(/,/g, ""))),
+        d3.max(top10, (d) => parseFloat(d[this.selectedYear].toString().replace(/,/g, ""))),
       ])
       .range([0, width]);
 
@@ -341,6 +634,8 @@ class DrawChart extends PreprocessData {
       .data(top10)
       .enter()
       .append("rect")
+      .transition()  // for animation
+      .duration(1000)
       .attr("class", "bar")
       .attr("x", x(0))
       .attr("y", (d) => y(d.Country))
@@ -355,107 +650,7 @@ class DrawChart extends PreprocessData {
     this.chart4.selectAll("*").remove();
   }
 
-  createLineChart() {
-    const lineChartWidth = 500;
-    const lineChartHeight = 400;
-    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
 
-    this.chart3 = d3
-      .select("#chart3")
-      .append("svg")
-      .attr("width", lineChartWidth + margin.left + margin.right)
-      .attr("height", lineChartHeight + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Prepare the data
-    const parseYear = d3.timeParse("%Y");
-    // Add other countries as needed
-    const selectedData = this.data.filter((d) =>
-      this.countries.includes(d.Country)
-    );
-
-    // Prepare scales and axes
-    const xScale = d3
-      .scaleTime()
-      .domain([parseYear(1999), parseYear(2022)])
-      .range([0, lineChartWidth]);
-
-    const yScale = d3
-      .scaleLinear()
-      .domain([
-        0,
-        d3.max(selectedData, (d) =>
-          d3.max(
-            Object.keys(d)
-              .filter((k) => k.match(/^\d{4}$/))
-              .map((k) => +d[k])
-          )
-        ),
-      ])
-      .range([lineChartHeight, 0]);
-
-    const xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%Y"));
-    const yAxis = d3.axisLeft(yScale);
-
-    // Draw axes
-    this.chart3
-      .append("g")
-      .attr("transform", "translate(0," + lineChartHeight + ")")
-      .call(xAxis);
-
-    this.chart3.append("g").call(yAxis);
-
-    // Draw lines
-    const line = d3
-      .line()
-      .x((d) => xScale(parseYear(d.year)))
-      .y((d) => yScale(d.value));
-
-    const colors = d3.scaleOrdinal(d3.schemeCategory10);
-
-    selectedData.forEach((countryData, index) => {
-      const country = countryData.Country;
-      const data = Object.keys(countryData)
-        .filter((k) => k.match(/^\d{4}$/))
-        .map((k) => ({ year: k, value: +countryData[k] }));
-
-      this.chart3
-        .append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", colors(index))
-        .attr("stroke-width", 1.5)
-        .attr("d", line)
-        .attr("class", "line")
-        .append("title")
-        .text(country);
-    });
-
-    // Add legend
-    const legend = this.chart3
-      .selectAll(".legend")
-      .data(countries)
-      .enter()
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", (d, i) => "translate(0," + i * 20 + ")");
-
-    legend
-      .append("rect")
-      .attr("x", lineChartWidth - 18)
-      .attr("width", 18)
-      .attr("height", 18)
-      .style("fill", (d, i) => colors(i));
-
-    legend
-      .append("text")
-      .attr("x", lineChartWidth - 24)
-      .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
-      .text((d) => d);
-  }
 
   // Call the createHistogram function
 }
