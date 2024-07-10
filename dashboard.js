@@ -68,10 +68,66 @@ function initDashboard(_data) {
   drawchart.createLineChart();
   drawchart.drawPieChart()
 
-  
+  let playing = false;  
+let interval;  
+const minYear = 1980;  
+const maxYear = 2022;  
+const step = 1; 
 
   // Attach the update function to the year filter dropdown
   document.getElementById("yearFilter").addEventListener("change", update);
+
+  document.getElementById('play-button').addEventListener('click', () => {  
+    playing = !playing;  
+    const playButton = document.getElementById('play-button');  
+      
+    if (playing) {  
+        playButton.textContent = '⏸️ Pause time-lapse';  
+        interval = setInterval(() => {  
+            let yearfilter = document.getElementById("yearFilter") ; 
+            let slider = document.getElementById('year-slider'); 
+            let currentYearSpan = document.getElementById("current-year")
+            let currentYear = parseInt(slider.value);  
+            if (currentYear < maxYear) {  
+              yearfilter.value = currentYear + step;
+              currentYearSpan.innerText = currentYear + step  
+              slider.value = currentYear + step;
+                updateYear(currentYear + step);  
+                updateTime()
+            } else {  
+                clearInterval(interval);  
+                playing = false;  
+                playButton.textContent = '▶ Play time-lapse';  
+                
+            }  
+        }, 4000); // Change the interval as needed  
+    } else {  
+        clearInterval(interval);  
+        playButton.textContent = '▶ Play time-lapse';  
+    }  
+});  
+
+document.getElementById('year-slider').addEventListener('input', (event) => {  
+  const year = event.target.value;  
+  updateYear(year);  
+
+});
+}
+
+
+function updateYear(year){
+  drawchart.setSelectedYear(year)
+}
+
+function updateTime(){
+  // Clear the existing charts if needed
+  clearDashboard()
+
+  // Redraw the charts with the new data
+  drawchart.createBarChart();
+  drawchart.createLineChart();
+  drawchart.renderMap(worldjsoninfo);
+  drawchart.drawPieChart()
 }
 
 function update() {

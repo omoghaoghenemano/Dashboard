@@ -73,6 +73,41 @@ body {
     fill: orange;
    
 }
+/* styles.css */  
+body {  
+    font-family: Arial, sans-serif;  
+}  
+  
+.control-panel {  
+    display: flex;  
+    align-items: center;  
+    margin: 20px;  
+}  
+  
+#play-button {  
+    background-color: white;  
+    border: 1px solid #ccc;  
+    border-radius: 5px;  
+    padding: 5px;  
+    cursor: pointer;  
+}  
+  
+#year-slider {  
+    margin: 0 15px;  
+    flex: 1;  
+}  
+  
+#current-year {  
+    font-size: 16px;  
+    width: 50px;  
+    text-align: center;  
+}  
+  
+#map-container {  
+    width: 100%;  
+    height: 500px;  
+}  
+
 .bar:hover {
     fill: steelblue;
 }

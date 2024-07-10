@@ -584,7 +584,7 @@ this.chart3.append("g").call(yAxis);
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    let year = "2021";
+   
 
     const x = d3
       .scaleLinear()
@@ -639,7 +639,7 @@ this.chart3.append("g").call(yAxis);
       .attr("class", "bar")
       .attr("x", x(0))
       .attr("y", (d) => y(d.Country))
-      .attr("width", (d) => x(parseFloat(d[year].toString().replace(/,/g, ""))))
+      .attr("width", (d) => x(parseFloat(d[this.selectedYear].toString().replace(/,/g, ""))))
       .attr("height", y.bandwidth());
   }
 
