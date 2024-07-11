@@ -398,17 +398,31 @@ class DrawChart extends PreprocessData {
         var names = countryNames[d.id];
         var countryPath = d3.select(this);
 
-        // Toggle the country's selection
-        if (selectedCountries.has(names)) {
-          selectedCountries.delete(names);
-          countryPath.attr(
-            "fill",
-            gdpMap[names] ? colorScale(gdpMap[names]) : "none"
-          );
-        } else {
-          selectedCountries.add(names);
-          countryPath.attr("fill", "orange");
+        //only accept less than 15 country selection
+        if(selectedCountries.size < 15 ){
+          // Toggle the country's selection 
+          if (selectedCountries.has(names) ) {
+            selectedCountries.delete(names);
+            countryPath.attr(
+              "fill",
+              gdpMap[names] ? colorScale(gdpMap[names]) : "none"
+            );
+          } else {
+            selectedCountries.add(names);
+            countryPath.attr("fill", "orange");
+          }
         }
+
+        else{
+          if (selectedCountries.has(names) ) {
+            selectedCountries.delete(names);
+            countryPath.attr(
+              "fill",
+              gdpMap[names] ? colorScale(gdpMap[names]) : "none"
+            );
+          }
+        }
+      
 
         var countries = [...selectedCountries];
 
