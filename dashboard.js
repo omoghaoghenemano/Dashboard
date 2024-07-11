@@ -17,7 +17,7 @@ let chart1, chart2, chart3, chart4;
 let countries = [];
 let selectedYear;
 let drawchart, worldsoninfo, dashboard_data;
-const colors = d3.scaleOrdinal(d3.schemeCategory10);
+let colors = d3.scaleOrdinal(d3.schemeCategory10);
 document.addEventListener("DOMContentLoaded", function () {
   // Select chart elements from the DOM using D3
   chart1 = d3.select("#chart1"); // Adjust with your actual selector
@@ -52,7 +52,6 @@ function initDashboard(_data) {
     "https://raw.githubusercontent.com/d3/d3.github.com/master/world-110m.v1.json"
   )
     .then(function (info) {
-      console.log("World map data", info);
       worldjsoninfo = info;
       drawchart.renderMap(info);
     })
@@ -108,10 +107,15 @@ const step = 1;
 });  
 
 document.getElementById('year-slider').addEventListener('input', (event) => {  
-  const year = event.target.value;  
+  const year = event.target.value; 
+  let currentYearSpan = document.getElementById("current-year")
+  currentYearSpan.innerText = year 
   updateYear(year);  
+  updateTime()
 
 });
+
+
 }
 
 
@@ -120,6 +124,7 @@ function updateYear(year){
 }
 
 function updateTime(){
+  
   // Clear the existing charts if needed
   clearDashboard()
 
@@ -134,7 +139,6 @@ function update() {
   // Get the new selected year
 
   selectedYear = document.getElementById("yearFilter").value;
-  console.log("Year selected:", selectedYear);
 
   // Update the DrawChart instance with the new year
   drawchart.setSelectedYear(selectedYear);
@@ -154,8 +158,8 @@ function updateCountries(countries){
 }
 
 function updateLineChart(){
-  console.log("data", countries)
   if (chart3) chart3.selectAll("*").remove();
+  countries = d3.scaleOrdinal(d3.schemeCategory10);
   drawchart.createLineChart()
 }
 

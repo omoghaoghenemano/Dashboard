@@ -10,12 +10,9 @@ class PreprocessData {
     // this.data = this.format_dataset(data);
 
     this.selectedYear = selectedYear;
-   
   }
 
   format_dataset(input) {
-    console.log("DATA ", input);
-
     const transformdata = {};
     const yearsSet = new Set();
     const codes = {};
@@ -52,7 +49,7 @@ class PreprocessData {
       const countryData = {
         Country: country,
         Code: codes[country],
-        Continent: this.getContinentByCountry(country), 
+        Continent: this.getContinentByCountry(country),
       };
       headerYears.forEach((year) => {
         countryData[year] = transformdata[country][year] || "0";
@@ -60,11 +57,8 @@ class PreprocessData {
       output.push(countryData);
     });
 
-    console.log(JSON.stringify(output, null, 2));
     return output;
-
   }
-
 
   saveStringToCsv(string) {
     var csv = string.replace(/\r\n|\n|\r/g, "\n");
@@ -78,240 +72,233 @@ class PreprocessData {
     document.body.removeChild(a);
   }
 
+  /** Get continent based on the country name */
+  getContinentByCountry(country) {
+    const countryToContinentMap = {
+      Afghanistan: "Asia",
+      Albania: "Europe",
+      Algeria: "Africa",
+      Andorra: "Europe",
+      Angola: "Africa",
+      "Antigua and Barbuda": "North America",
+      Argentina: "South America",
+      Armenia: "Asia",
+      Australia: "Oceania",
+      Austria: "Europe",
+      Azerbaijan: "Asia",
+      Bahamas: "North America",
+      Bahrain: "Asia",
+      Bangladesh: "Asia",
+      Barbados: "North America",
+      Belarus: "Europe",
+      Belgium: "Europe",
+      Belize: "North America",
+      Benin: "Africa",
+      Bhutan: "Asia",
+      Bolivia: "South America",
+      "Bosnia and Herzegovina": "Europe",
+      Botswana: "Africa",
+      Brazil: "South America",
+      Brunei: "Asia",
+      Bulgaria: "Europe",
+      "Burkina Faso": "Africa",
+      Burundi: "Africa",
+      "Cape Verde": "Africa",
+      Cambodia: "Asia",
+      Cameroon: "Africa",
+      Canada: "North America",
+      "Central African Republic": "Africa",
+      Chad: "Africa",
+      Chile: "South America",
+      China: "Asia",
+      Colombia: "South America",
+      Comoros: "Africa",
+      "Democratic Republic of Congo": "Africa",
+      Congo: "Africa",
+      "Costa Rica": "North America",
+      "Cote d'Ivoire": "Africa",
+      Croatia: "Europe",
+      Cuba: "North America",
+      Cyprus: "Asia",
+      Czechia: "Europe",
+      Czechoslovakia: "Europe",
+      Denmark: "Europe",
+      Djibouti: "Africa",
+      Dominica: "North America",
+      "Dominican Republic": "North America",
+      "East Timor (Timor-Leste)": "Asia",
+      "East Asia (MPD)": "Asia",
+      "Eastern Europe (MPD)": "Europe",
+      "Former Sudan": "Africa",
+      Ecuador: "South America",
+      Egypt: "Africa",
+      "El Salvador": "North America",
+      "Equatorial Guinea": "Africa",
+      Eritrea: "Africa",
+      Estonia: "Europe",
+      Eswatini: "Africa",
+      Ethiopia: "Africa",
+      Fiji: "Oceania",
+      Finland: "Europe",
+      France: "Europe",
+      Gabon: "Africa",
+      Gambia: "Africa",
+      Georgia: "Asia",
+      Germany: "Europe",
+      Ghana: "Africa",
+      Greece: "Europe",
+      Grenada: "North America",
+      Guatemala: "North America",
+      Guinea: "Africa",
+      "Guinea-Bissau": "Africa",
+      Guyana: "South America",
+      Haiti: "North America",
+      "Hong Kong": "Asia",
+      Honduras: "North America",
+      Hungary: "Europe",
+      Myanmar: "Asia",
+      Iceland: "Europe",
+      India: "Asia",
+      Indonesia: "Asia",
+      Iran: "Asia",
+      Iraq: "Asia",
+      Ireland: "Europe",
+      Israel: "Asia",
+      Italy: "Europe",
+      Jamaica: "North America",
+      Japan: "Asia",
+      Jordan: "Asia",
+      Kazakhstan: "Asia",
+      Kenya: "Africa",
+      Kiribati: "Oceania",
+      "Korea, North": "Asia",
+      "Korea, South": "Asia",
+      Kosovo: "Europe",
+      Kuwait: "Asia",
+      Kyrgyzstan: "Asia",
+      Laos: "Asia",
+      Latvia: "Europe",
+      Lebanon: "Asia",
+      Lesotho: "Africa",
+      Liberia: "Africa",
+      Libya: "Africa",
+      Liechtenstein: "Europe",
+      Lithuania: "Europe",
+      Luxembourg: "Europe",
+      Madagascar: "Africa",
+      Malawi: "Africa",
+      Malaysia: "Asia",
+      Maldives: "Asia",
+      Mali: "Africa",
+      Malta: "Europe",
+      "Marshall Islands": "Oceania",
+      Mauritania: "Africa",
+      Mauritius: "Africa",
+      Mexico: "North America",
+      "Micronesia, Federated States of": "Oceania",
+      Moldova: "Europe",
+      Monaco: "Europe",
+      Mongolia: "Asia",
+      Montenegro: "Europe",
+      Morocco: "Africa",
+      Mozambique: "Africa",
+      "Myanmar (Burma)": "Asia",
+      Namibia: "Africa",
+      Nauru: "Oceania",
+      Nepal: "Asia",
+      Netherlands: "Europe",
+      "North Korea": "Asia",
+      "New Zealand": "Oceania",
+      Nicaragua: "North America",
+      Niger: "Africa",
+      Nigeria: "Africa",
+      "North Macedonia": "Europe",
+      Norway: "Europe",
+      Oman: "Asia",
+      Pakistan: "Asia",
+      Palau: "Oceania",
+      Panama: "North America",
+      "Papua New Guinea": "Oceania",
+      Paraguay: "South America",
+      Peru: "South America",
+      Palestine: "Asia",
+      "Puerto Rico": "North America",
+      Philippines: "Asia",
+      Poland: "Europe",
+      Portugal: "Europe",
+      Qatar: "Asia",
+      Romania: "Europe",
+      Russia: "Europe",
+      Rwanda: "Africa",
+      "Saint Kitts and Nevis": "North America",
+      "Saint Lucia": "North America",
+      "Saint Vincent and the Grenadines": "North America",
+      Samoa: "Oceania",
+      "San Marino": "Europe",
+      "Sao Tome and Principe": "Africa",
+      "Saudi Arabia": "Asia",
+      Senegal: "Africa",
+      Serbia: "Europe",
+      Seychelles: "Africa",
+      "Sierra Leone": "Africa",
+      Singapore: "Asia",
+      Slovakia: "Europe",
+      Slovenia: "Europe",
+      "Solomon Islands": "Oceania",
+      Somalia: "Africa",
+      "South Africa": "Africa",
+      "South Sudan": "Africa",
+      "South Korea": "Asia",
+      "South and South East Asia (MPD)": "Asia",
+      "Sub Saharan Africa (MPD)": "Africa",
+      Spain: "Europe",
+      "Sri Lanka": "Asia",
+      Sudan: "Africa",
+      Suriname: "South America",
+      Sweden: "Europe",
+      Switzerland: "Europe",
+      Syria: "Asia",
+      Taiwan: "Asia",
+      Tajikistan: "Asia",
+      Tanzania: "Africa",
+      Thailand: "Asia",
+      Togo: "Africa",
+      Tonga: "Oceania",
+      "Trinidad and Tobago": "North America",
+      Tunisia: "Africa",
+      Turkey: "Asia",
+      Turkmenistan: "Asia",
+      Tuvalu: "Oceania",
+      Uganda: "Africa",
+      Ukraine: "Europe",
+      "United Arab Emirates": "Asia",
+      "United Kingdom": "Europe",
+      "United States": "North America",
+      Uruguay: "South America",
+      Uzbekistan: "Asia",
+      Vanuatu: "Oceania",
+      "Vatican City": "Europe",
+      Venezuela: "South America",
+      "Western Europe (MPD)": "Europe",
+      Vietnam: "Asia",
+      Yemen: "Asia",
+      Zambia: "Africa",
+      Zimbabwe: "Africa",
+    };
 
-  /** Get continent based on the country name */  
-  getContinentByCountry(country) {  
-      const countryToContinentMap =
-      {
-        "Afghanistan": "Asia",
-        "Albania": "Europe",
-        "Algeria": "Africa",
-        "Andorra": "Europe",
-        "Angola": "Africa",
-        "Antigua and Barbuda": "North America",
-        "Argentina": "South America",
-        "Armenia": "Asia",
-        "Australia": "Oceania",
-        "Austria": "Europe",
-        "Azerbaijan": "Asia",
-        "Bahamas": "North America",
-        "Bahrain": "Asia",
-        "Bangladesh": "Asia",
-        "Barbados": "North America",
-        "Belarus": "Europe",
-        "Belgium": "Europe",
-        "Belize": "North America",
-        "Benin": "Africa",
-        "Bhutan": "Asia",
-        "Bolivia": "South America",
-        "Bosnia and Herzegovina": "Europe",
-        "Botswana": "Africa",
-        "Brazil": "South America",
-        "Brunei": "Asia",
-        "Bulgaria": "Europe",
-        "Burkina Faso": "Africa",
-        "Burundi": "Africa",
-        "Cape Verde": "Africa",
-        "Cambodia": "Asia",
-        "Cameroon": "Africa",
-        "Canada": "North America",
-        "Central African Republic": "Africa",
-        "Chad": "Africa",
-        "Chile": "South America",
-        "China": "Asia",
-        "Colombia": "South America",
-        "Comoros": "Africa",
-        "Democratic Republic of Congo": "Africa",
-        "Congo": "Africa",
-        "Costa Rica": "North America",
-        "Cote d'Ivoire": "Africa",
-        "Croatia": "Europe",
-        "Cuba": "North America",
-        "Cyprus": "Asia",
-        "Czechia": "Europe",
-        "Czechoslovakia":"Europe",
-        "Denmark": "Europe",
-        "Djibouti": "Africa",
-        "Dominica": "North America",
-        "Dominican Republic": "North America",
-        "East Timor (Timor-Leste)": "Asia",
-        "East Asia (MPD)":"Asia",
-        "Eastern Europe (MPD)":"Europe",
-        "Former Sudan":"Africa",
-        "Ecuador": "South America",
-        "Egypt": "Africa",
-        "El Salvador": "North America",
-        "Equatorial Guinea": "Africa",
-        "Eritrea": "Africa",
-        "Estonia": "Europe",
-        "Eswatini": "Africa",
-        "Ethiopia": "Africa",
-        "Fiji": "Oceania",
-        "Finland": "Europe",
-        "France": "Europe",
-        "Gabon": "Africa",
-        "Gambia": "Africa",
-        "Georgia": "Asia",
-        "Germany": "Europe",
-        "Ghana": "Africa",
-        "Greece": "Europe",
-        "Grenada": "North America",
-        "Guatemala": "North America",
-        "Guinea": "Africa",
-        "Guinea-Bissau": "Africa",
-        "Guyana": "South America",
-        "Haiti": "North America",
-        "Hong Kong":"Asia",
-        "Honduras": "North America",
-        "Hungary": "Europe",
-        "Myanmar":"Asia",
-        "Iceland": "Europe",
-        "India": "Asia",
-        "Indonesia": "Asia",
-        "Iran": "Asia",
-        "Iraq": "Asia",
-        "Ireland": "Europe",
-        "Israel": "Asia",
-        "Italy": "Europe",
-        "Jamaica": "North America",
-        "Japan": "Asia",
-        "Jordan": "Asia",
-        "Kazakhstan": "Asia",
-        "Kenya": "Africa",
-        "Kiribati": "Oceania",
-        "Korea, North": "Asia",
-        "Korea, South": "Asia",
-        "Kosovo": "Europe",
-        "Kuwait": "Asia",
-        "Kyrgyzstan": "Asia",
-        "Laos": "Asia",
-        "Latvia": "Europe",
-        "Lebanon": "Asia",
-        "Lesotho": "Africa",
-        "Liberia": "Africa",
-        "Libya": "Africa",
-        "Liechtenstein": "Europe",
-        "Lithuania": "Europe",
-        "Luxembourg": "Europe",
-        "Madagascar": "Africa",
-        "Malawi": "Africa",
-        "Malaysia": "Asia",
-        "Maldives": "Asia",
-        "Mali": "Africa",
-        "Malta": "Europe",
-        "Marshall Islands": "Oceania",
-        "Mauritania": "Africa",
-        "Mauritius": "Africa",
-        "Mexico": "North America",
-        "Micronesia, Federated States of": "Oceania",
-        "Moldova": "Europe",
-        "Monaco": "Europe",
-        "Mongolia": "Asia",
-        "Montenegro": "Europe",
-        "Morocco": "Africa",
-        "Mozambique": "Africa",
-        "Myanmar (Burma)": "Asia",
-        "Namibia": "Africa",
-        "Nauru": "Oceania",
-        "Nepal": "Asia",
-        "Netherlands": "Europe",
-        "North Korea":"Asia",
-        "New Zealand": "Oceania",
-        "Nicaragua": "North America",
-        "Niger": "Africa",
-        "Nigeria": "Africa",
-        "North Macedonia": "Europe",
-        "Norway": "Europe",
-        "Oman": "Asia",
-        "Pakistan": "Asia",
-        "Palau": "Oceania",
-        "Panama": "North America",
-        "Papua New Guinea": "Oceania",
-        "Paraguay": "South America",
-        "Peru": "South America",
-        "Palestine":"Asia",
-        "Puerto Rico":"North America",
-        "Philippines": "Asia",
-        "Poland": "Europe",
-        "Portugal": "Europe",
-        "Qatar": "Asia",
-        "Romania": "Europe",
-        "Russia": "Europe",
-        "Rwanda": "Africa",
-        "Saint Kitts and Nevis": "North America",
-        "Saint Lucia": "North America",
-        "Saint Vincent and the Grenadines": "North America",
-        "Samoa": "Oceania",
-        "San Marino": "Europe",
-        "Sao Tome and Principe": "Africa",
-        "Saudi Arabia": "Asia",
-        "Senegal": "Africa",
-        "Serbia": "Europe",
-        "Seychelles": "Africa",
-        "Sierra Leone": "Africa",
-        "Singapore": "Asia",
-        "Slovakia": "Europe",
-        "Slovenia": "Europe",
-        "Solomon Islands": "Oceania",
-        "Somalia": "Africa",
-        "South Africa": "Africa",
-        "South Sudan": "Africa",
-        "South Korea":"Asia",
-        'South and South East Asia (MPD)':"Asia",
-        "Sub Saharan Africa (MPD)":"Africa",
-        "Spain": "Europe",
-        "Sri Lanka": "Asia",
-        "Sudan": "Africa",
-        "Suriname": "South America",
-        "Sweden": "Europe",
-        "Switzerland": "Europe",
-        "Syria": "Asia",
-        "Taiwan": "Asia",
-        "Tajikistan": "Asia",
-        "Tanzania": "Africa",
-        "Thailand": "Asia",
-        "Togo": "Africa",
-        "Tonga": "Oceania",
-        "Trinidad and Tobago": "North America",
-        "Tunisia": "Africa",
-        "Turkey": "Asia",
-        "Turkmenistan": "Asia",
-        "Tuvalu": "Oceania",
-        "Uganda": "Africa",
-        "Ukraine": "Europe",
-        "United Arab Emirates": "Asia",
-        "United Kingdom": "Europe",
-        "United States": "North America",
-        "Uruguay": "South America",
-        "Uzbekistan": "Asia",
-        "Vanuatu": "Oceania",
-        "Vatican City": "Europe",
-        "Venezuela": "South America",
-        "Western Europe (MPD)":"Europe",
-        "Vietnam": "Asia",
-        "Yemen": "Asia",
-        "Zambia": "Africa",
-        "Zimbabwe": "Africa"
-      }
-      
+    return countryToContinentMap[country] || "Unknown";
+  }
 
-      return countryToContinentMap[country] || "Unknown";  
-  }  
-
-   /** modify the data and add countries by continents */  
-  addContinentBasedOnCountry(data) { 
-
-     data = data.map((item) => ({  
-        ...item,  
-        Continent: this.getContinentByCountry(item.Country),  
-    }));  
-
-    console.log("data",data)
+  /** modify the data and add countries by continents */
+  addContinentBasedOnCountry(data) {
+    data = data.map((item) => ({
+      ...item,
+      Continent: this.getContinentByCountry(item.Country),
+    }));
 
     return data;
-
-} 
-  //return map name with country id
+  }
+  //use to map country index in the world map
   get_country() {
     return {
       "004": "Afghanistan",
@@ -453,7 +440,7 @@ class PreprocessData {
       175: "Mayotte",
       484: "Mexico",
       583: "Micronesia, Federated States of",
-      498: "Moldova, Republic of",
+      498: "Moldova",
       492: "Monaco",
       496: "Mongolia",
       499: "Montenegro",
@@ -548,7 +535,7 @@ class PreprocessData {
       860: "Uzbekistan",
       548: "Vanuatu",
       862: "Venezuela, Bolivarian Republic of",
-      704: "Viet Nam",
+      704: "Vietnam",
       "092": "Virgin Islands, British",
       850: "Virgin Islands, U.S.",
       876: "Wallis and Futuna",
@@ -576,8 +563,7 @@ class PreprocessData {
   }
 
   top10CountryHighestGdp() {
-    console.log("selected year", this.selectedYear);
-     // Sort the data in descending order based on the "2022" attribute
+    // Sort the data in descending order based on the "2022" attribute
     this.data = this.data.sort(
       (a, b) => b[this.selectedYear] - a[this.selectedYear]
     );
@@ -590,39 +576,8 @@ class PreprocessData {
 
   mapGpdWithId(countryname, data) {
     var filter = data.filter((country) => country.country === countryname);
-    console.log("filter", filter);
     return filter;
   }
 
-  /** calculate correlation coefficient */
-  calculateCorrelation(data1, data2) {
-    if (data1.length !== data2.length) {
-      throw new Error("Input arrays must have the same length");
-    }
 
-    const n = data1.length;
-
-    // Calculate the mean of each dataset
-    const mean1 = data1.reduce((acc, val) => acc + val, 0) / n;
-    const mean2 = data2.reduce((acc, val) => acc + val, 0) / n;
-
-    // Calculate the sum of the products of the differences from the mean
-    let covariance = 0;
-    let variance1 = 0;
-    let variance2 = 0;
-
-    for (let i = 0; i < n; i++) {
-      const diff1 = data1[i] - mean1;
-      const diff2 = data2[i] - mean2;
-
-      covariance += diff1 * diff2;
-      variance1 += diff1 * diff1;
-      variance2 += diff2 * diff2;
-    }
-
-    // Calculate the correlation coefficient
-    const correlation = covariance / Math.sqrt(variance1 * variance2);
-
-    return correlation;
-  }
 }

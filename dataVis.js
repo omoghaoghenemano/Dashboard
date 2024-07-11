@@ -69,10 +69,7 @@ function init() {
         reader.onloadend = function () {
 
             data = d3.csvParse(reader.result, d3.autoType);
-            console.log("data loaded: ");
-            console.log(data);
-            console.log("Dimensions:", data.columns);
-            
+    
             CreateDataTable(data);
 
             data.forEach((d, index) => d.id = index);
@@ -345,7 +342,6 @@ function updateLegend() {
         .style("height", "10px")
         .style("margin-right", "5px");
 
-        console.log(selectedPoints,"selected point")
     legendEnter.append("span")
         .style("color", d => d[1].color)
         .text(d => `${d[1].label}`);
